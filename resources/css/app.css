@@ -1,0 +1,20 @@
+/* datatables.net */
+@import "../../node_modules/datatables.net-bs5/css/dataTables.bootstrap5.css";
+@import "../../node_modules/datatables.net-autofill-bs5/css/autoFill.bootstrap5.css";
+@import "../../node_modules/datatables.net-colreorder-bs5/css/colReorder.bootstrap5.css";
+@import "../../node_modules/datatables.net-fixedheader-bs5/css/fixedHeader.bootstrap5.css";
+@import "../../node_modules/datatables.net-responsive-bs5/css/responsive.bootstrap5.css";
+
+/* select2 */
+@import "../../node_modules/select2/dist/css/select2.css";
+@import "../../node_modules/select2-bootstrap-5-theme/dist/select2-bootstrap-5-theme.css";
+
+/* minicolors */
+@import "../../node_modules/@claviska/jquery-minicolors/jquery.minicolors.css";
+
+/* animate.css */
+@import "../../node_modules/animate.css/animate.css";
+
+/* jquery-ui */
+/* @import "../../node_modules/jquery-ui/dist/themes/base/jquery-ui.css"; */
+/* @import "../../node_modules/jquery-ui/dist/themes/base/theme.css"; */

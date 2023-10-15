@@ -1,0 +1,23 @@
+@import "../../node_modules/bootstrap/scss/bootstrap.scss";
+@import "../../node_modules/bootstrap/scss/bootstrap-grid.scss";
+@import "../../node_modules/bootstrap/scss/bootstrap-reboot.scss";
+@import "../../node_modules/bootstrap/scss/bootstrap-utilities.scss";
+
+// fortawesome
+$fa-font-path: "../../node_modules/@fortawesome/fontawesome-free/webfonts";
+@import "../../node_modules/@fortawesome/fontawesome-free/scss/fontawesome.scss";
+@import "../../node_modules/@fortawesome/fontawesome-free/scss/brands.scss";
+@import "../../node_modules/@fortawesome/fontawesome-free/scss/regular.scss";
+@import "../../node_modules/@fortawesome/fontawesome-free/scss/solid.scss";
+@import "../../node_modules/@fortawesome/fontawesome-free/scss/v4-shims.scss";
+
+// mdi fonts
+$mdi-font-path: "../../node_modules/@mdi/font/fonts";
+@import "../../node_modules/@mdi/font/scss/materialdesignicons.scss";
+
+// bootstrap icon
+$bootstrap-icons-font-dir: "../../node_modules/bootstrap-icons/font/fonts";
+@import "../../node_modules/bootstrap-icons/font/bootstrap-icons.scss";
+
+// pretty-checkbox
+@import "../../node_modules/pretty-checkbox/src/pretty-checkbox.scss";
