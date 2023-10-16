@@ -13,7 +13,6 @@ class FileContent extends Model
 	use HasFactory;
 	protected $table = 'file_contents';
 	protected $fillable = [
-		'file_id',
 		'UNIQUE_KEY',
 		'PRODUCT_TITLE',
 		'PRODUCT_DESCRIPTION',
@@ -23,10 +22,4 @@ class FileContent extends Model
 		'COLOR_NAME',
 		'PIECE_PRICE',
 	];
-
-
-	public function belongstofile(): HasMany
-	{
-		return $this->BelongsTo(Interview::class, 'file_id');
-	}
 }

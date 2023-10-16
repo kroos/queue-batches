@@ -22,7 +22,9 @@ class StoreInterviewRequest extends FormRequest
 	public function rules(): array
 	{
 		return [
-			'csv.*' => 'required|file|max:204800|mimes:csv',
+			'csv' => 'required|max:204800',
+			// 'csv.*' => 'mimes:text/csv',
+			'csv.*' => 'mimetypes:text/csv,text/plain,application/csv,text/comma-separated-values,text/anytext,application/octet-stream,application/txt',
 		];
 	}
 

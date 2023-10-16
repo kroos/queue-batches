@@ -21,7 +21,7 @@ use Maatwebsite\Excel\Concerns\WithProgressBar;
 use Maatwebsite\Excel\Imports\HeadingRowFormatter;
 use Maatwebsite\Excel\Concerns\WithCustomCsvSettings;
 
-class CSVFileImport implements ToModel, WithUpserts, WithUpsertColumns, WithBatchInserts, WithChunkReading*//*, WithProgressBar, WithHeadingRow, WithCustomCsvSettings
+class CSVFileImport implements ToModel, WithUpserts, WithUpsertColumns, WithBatchInserts/*, WithChunkReading, WithProgressBar*/, WithHeadingRow, WithCustomCsvSettings
 // class CSVFileImport implements ToCollection/*, WithHeadingRow*/
 {
 	use RemembersRowNumber, Importable;
@@ -77,10 +77,10 @@ class CSVFileImport implements ToModel, WithUpserts, WithUpsertColumns, WithBatc
 		return 200;
 	}
 
-	public function chunkSize(): int
-	{
-		return 1000;
-	}
+	// public function chunkSize(): int
+	// {
+	// 	return 1000;
+	// }
 
 	public function uniqueBy()
 	{
@@ -92,13 +92,14 @@ class CSVFileImport implements ToModel, WithUpserts, WithUpsertColumns, WithBatc
 	{
 		// return ['name', 'role'];
 		return [
-					'PRODUCT_TITLE',
-					'PRODUCT_DESCRIPTION',
-					'STYLE#',
-					'SANMAR_MAINFRAME_COLOR',
-					'SIZE',
-					'COLOR_NAME',
-					'PIECE_PRICE',
+				// 'UNIQUE_KEY',
+				'PRODUCT_TITLE',
+				'PRODUCT_DESCRIPTION',
+				'STYLE#',
+				'SANMAR_MAINFRAME_COLOR',
+				'SIZE',
+				'COLOR_NAME',
+				'PIECE_PRICE',
 		];
 	}
 

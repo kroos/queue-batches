@@ -13,6 +13,14 @@ return new class extends Migration
     {
         Schema::create('file_contents', function (Blueprint $table) {
             $table->id();
+            $table->string('UNIQUE_KEY');
+            $table->string('PRODUCT_TITLE');
+            $table->string('PRODUCT_DESCRIPTION');
+            $table->string('STYLE#');
+            $table->string('SANMAR_MAINFRAME_COLOR');
+            $table->string('SIZE');
+            $table->string('COLOR_NAME');
+            $table->string('PIECE_PRICE');
             $table->timestamps();
         });
     }

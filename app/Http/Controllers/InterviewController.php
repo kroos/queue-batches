@@ -56,32 +56,39 @@ class InterviewController extends Controller
 	public function store(StoreInterviewRequest $request)/*: RedirectResponse*/
 	{
 		ini_set('max_execution_time', 3000);
+		// try{
+			// dd($request->file('csv'));
+			if($request->file('csv')){
+				foreach ($request->file('csv') as $v) {
+					$file = $v->getClientOriginalName();
+					$currentDate = Str::random(10);
+					$fileName = $currentDate . '_' . $file;
+					// Store File in Storage Folder
+					// $request->csv->storeAs('public/csv', $fileName);
+					$v->storeAs('public/csv', $fileName);
+					// storage/app/uploads/file.png
+					// Store File in Public Folder
+					// $request->csv->move(public_path('uploads'), $fileName);
+					// public/uploads/file.png
+					$data = ['file' => $fileName];
+					$l = Interview::create($data);
 
-		// return response()->json('ok');
-		// dd($request->file('csv'));
-		if($request->file('csv')){
-			foreach ($request->file('csv') as $v) {
-				$file = $v->getClientOriginalName();
-				$currentDate = Str::random(10);
-				$fileName = $currentDate . '_' . $file;
-				// Store File in Storage Folder
-				// $request->csv->storeAs('public/csv', $fileName);
-				$v->storeAs('public/csv', $fileName);
-				// storage/app/uploads/file.png
-				// Store File in Public Folder
-				// $request->csv->move(public_path('uploads'), $fileName);
-				// public/uploads/file.png
-				$data = ['file' => $fileName];
-				$l = Interview::create($data);
+					// $lfile = storage_path('app/public/csv/'.$fileName);
 
-				// $lfile = storage_path('app/public/csv/'.$fileName);
+					// populate data from csv to DB
+					// $collection = Excel::toCollection(new CSVFileImport, $v);
 
-				// populate data from csv to DB
-				// $collection = Excel::toCollection(new CSVFileImport, $v);
-
-				$import = Excel::import(new CSVFileImport, $v);
+					$import = Excel::import(new CSVFileImport, $v);
+					$l->update(['status' => 'Success']);
+				}
+				$resp = ['status' => 'success', 'message' => 'File Upload And Process Successfully!!'];
+				return response()->json($resp);
 			}
-		}
+		// }catch(\Exception $e){
+			// $l->update(['status' => 'Failed']);
+		// 	$resp = ['status' => 'error', 'message' => 'Failed to process uploaded file/s!'];
+		// 	return response()->json($resp);
+		// }
 	}
 
 	/**

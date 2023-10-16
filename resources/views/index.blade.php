@@ -173,12 +173,17 @@
 						});
 					},
 					success: function(resp){
-						if(resp == 'ok'){
-							$('#uploadForm')[0].reset();
-							$('#uploadStatus').html('<p class="text-success">File has uploaded successfully!</p>');
-						}else if(resp == 'err'){
-							$('#uploadStatus').html('<p style="color:#EA4335;">Please select a valid file to upload.</p>');
-						}
+						console.log(resp);
+						// if(resp.status == 'success'){
+						// 	$('#uploadForm')[0].reset();
+						// 	$('#uploadStatus').html('<p class="text-success">File has uploaded successfully!</p>');
+						// }else if(resp.status == 'error'){
+						// 	$('#uploadStatus').html('<p style="color:#EA4335;">Please select a valid file to upload.</p>');
+						// }
+							Swal.fire(resp.status + '!', resp.message, resp.status)
+							.then(function(){
+								window.location.reload(true);
+							});
 					}
 				});
 			});

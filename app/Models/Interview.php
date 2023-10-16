@@ -13,7 +13,7 @@ class Interview extends Model
 	use HasFactory;
 	protected $table = 'files';
 	protected $fillable = [
-		'file',
+		'file', 'status',
 	];
 
 	public function hasmanycontents(): HasMany
