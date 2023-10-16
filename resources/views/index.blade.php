@@ -62,7 +62,7 @@
 				@endif
 
 				@if(count($errors) > 0 )
-				<div class="col-sm-12">
+				<div class="col-sm-12 mb-3">
 					<ul class="list-group">
 						@foreach($errors->all() as $err)
 							<li class="list-group-item list-group-item-danger">
@@ -72,13 +72,13 @@
 					</ul>
 				</div>
 				@endif
-
+				<p>&nbsp;</p>
 				<form name="frmupload" method="POST" action="{{ route('interview.store') }}" accept-charset="UTF-8" id="uploadForm" autocomplete="off" enctype="multipart/form-data">
 					@csrf
 					<div class="form-group row mb-3 {{ $errors->has('reason') ? 'has-error' : '' }}">
-						<label for="formFileSm" class="col-form-label form-label-sm col-sm-2">Upload :</label>
+						<label for="fileInput" class="col-form-label form-label-sm col-sm-2">Upload :</label>
 						<div class="col-auto">
-							<input name="csv" class="form-control form-control-sm col-auto" id="formFileSm" type="file" aria-describedby="progressbar1" multiple>
+							<input name="csv[]" class="form-control form-control-sm col-auto" id="fileInput" type="file" aria-describedby="progressbar1" multiple>
 							<div id="progressbar1" class="form-text">Progress Bar.</div>
 							<div id="progressBar" class="progress" role="progressbar" aria-label="Example with label" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
 								<div class="progress-bar percent" id="percent" style="width: 0%">0%</div>
@@ -159,7 +159,8 @@
 					data: new FormData(this),
 					contentType: false,
 					cache: false,
-					processData:false,
+					// processData:false,
+					processData:true,
 					beforeSend: function(){
 						$(".progress-bar").width('0%');
 						$('#uploadStatus').html('<i class="fa-solid fa-spinner fa-spin-pulse fa-beat-fade"></i>');
@@ -167,7 +168,7 @@
 					error:function(resp){
 						const res = resp.responseJSON;
 						// $('#uploadStatus').html('<p class="text-danger">' + res.message + '</p>');
-						Swal.fire('Error!', return res.message,'error')
+						Swal.fire('Error!', res.message,'error')
 						.then(function(){
 							window.location.reload(true);
 						});
@@ -185,11 +186,16 @@
 
 			// File type validation
 			$("#fileInput").change(function(){
-				var allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.ms-office', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'image/jpeg', 'image/png', 'image/jpg', 'image/gif'];
+				// var allowedTypes = ['application/vnd.ms-excel', 'application/pdf', 'application/msword', 'application/vnd.ms-office', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'image/jpeg', 'image/png', 'image/jpg', 'image/gif'];
+				var allowedTypes = ['application/vnd.ms-excel'];
 				var file = this.files[0];
 				var fileType = file.type;
 				if(!allowedTypes.includes(fileType)){
-					alert('Please select a valid file (PDF/DOC/DOCX/JPEG/JPG/PNG/GIF).');
+					// alert('Please select a valid file (PDF/DOC/DOCX/JPEG/JPG/PNG/GIF).');
+					Swal.fire('Error!', 'Please select a valid file (CSV file/s only)','error')
+					.then(function(){
+						window.location.reload(true);
+					});
 					$("#fileInput").val('');
 					return false;
 				}

@@ -5,6 +5,13 @@ namespace App\Http\Controllers;
 // load model
 use App\Models\Interview;
 
+// load excel/csv/xls import/upload
+use Maatwebsite\Excel\Facades\Excel;
+use App\Imports\CSVFileImport;
+
+// load utf8 encoding
+use \App\Helpers\Encoding;
+
 // load validation
 use App\Http\Requests\StoreInterviewRequest;
 use App\Http\Requests\UpdateInterviewRequest;
@@ -14,6 +21,9 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
+
+// load storage
+use Illuminate\Support\Facades\Storage;
 
 use Illuminate\Support\Str;
 use Illuminate\Support\Arr;
@@ -45,21 +55,33 @@ class InterviewController extends Controller
 	 */
 	public function store(StoreInterviewRequest $request)/*: RedirectResponse*/
 	{
+		ini_set('max_execution_time', 3000);
+
 		// return response()->json('ok');
-		// dd($request->all());
+		// dd($request->file('csv'));
 		if($request->file('csv')){
-			$file = $request->file('csv')->getClientOriginalName();
-			$currentDate = Str::random(10);
-			$fileName = $currentDate . '_' . $file;
-			// Store File in Storage Folder
-			$request->csv->storeAs('public/csv', $fileName);
-			// storage/app/uploads/file.png
-			// Store File in Public Folder
-			// $request->csv->move(public_path('uploads'), $fileName);
-			// public/uploads/file.png
-			$data += ['file' => $fileName];
+			foreach ($request->file('csv') as $v) {
+				$file = $v->getClientOriginalName();
+				$currentDate = Str::random(10);
+				$fileName = $currentDate . '_' . $file;
+				// Store File in Storage Folder
+				// $request->csv->storeAs('public/csv', $fileName);
+				$v->storeAs('public/csv', $fileName);
+				// storage/app/uploads/file.png
+				// Store File in Public Folder
+				// $request->csv->move(public_path('uploads'), $fileName);
+				// public/uploads/file.png
+				$data = ['file' => $fileName];
+				$l = Interview::create($data);
+
+				// $lfile = storage_path('app/public/csv/'.$fileName);
+
+				// populate data from csv to DB
+				// $collection = Excel::toCollection(new CSVFileImport, $v);
+
+				$import = Excel::import(new CSVFileImport, $v);
+			}
 		}
-		$l = Interview::create($data);
 	}
 
 	/**
