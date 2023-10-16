@@ -159,8 +159,7 @@
 					data: new FormData(this),
 					contentType: false,
 					cache: false,
-					// processData:false,
-					processData:true,
+					processData:false,
 					beforeSend: function(){
 						$(".progress-bar").width('0%');
 						$('#uploadStatus').html('<i class="fa-solid fa-spinner fa-spin-pulse fa-beat-fade"></i>');
