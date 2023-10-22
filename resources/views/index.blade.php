@@ -30,11 +30,12 @@
 
 	<script type="module" src="{{ asset('js/pc-bootstrap4-datetimepicker/build/js/bootstrap-datetimepicker.min.js') }}"></script>
 	<link href="{{ asset('js/pc-bootstrap4-datetimepicker/build/css/bootstrap-datetimepicker.css') }}" rel="stylesheet">
+	@livewireStyles
 </head>
 <body>
-	<div class="container row justify-content-center align-items-start">
-		<div class="d-flex flex-column align-items-center text-center p-3 py-5">
-			<h4 class="align-items-center">Interview Task</h4>
+	<div class="container-fluid justify-content-center align-items-start">
+		<div class="row col-auto justify-content-center text-center p-3 py-5">
+			<h4 class="text-center">Interview Task</h4>
 			<div class="col-sm-8">
 				<noscript>
 					<style type="text/css">
@@ -75,20 +76,22 @@
 				<p>&nbsp;</p>
 				<form name="frmupload" method="POST" action="{{ route('interview.store') }}" accept-charset="UTF-8" id="uploadForm" autocomplete="off" enctype="multipart/form-data">
 					@csrf
-					<div class="form-group row mb-3 {{ $errors->has('reason') ? 'has-error' : '' }}">
-						<label for="fileInput" class="col-form-label form-label-sm col-sm-2">Upload :</label>
-						<div class="col-auto">
-							<input name="csv[]" class="form-control form-control-sm col-auto" id="fileInput" type="file" aria-describedby="progressbar1" multiple>
-							<div id="progressbar1" class="form-text">Progress Bar.</div>
-							<div id="progressBar" class="progress" role="progressbar" aria-label="Example with label" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
-								<div class="progress-bar percent" id="percent" style="width: 0%">0%</div>
+					<div class="row justify-content-center">
+						<div class="form-group row mb-3 {{ $errors->has('reason') ? 'has-error' : '' }}">
+							<label for="fileInput" class="col-form-label form-label-sm col-sm-2">Upload :</label>
+							<div class="col-auto">
+								<input name="csv[]" class="form-control form-control-sm col-auto" id="fileInput" type="file" aria-describedby="progressbar1" multiple>
+								<div id="progressbar1" class="form-text">Progress Bar</div>
+								<div id="progressBar" class="progress" role="progressbar" aria-label="Progress Bar with label" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+									<div class="progress-bar percent" id="percent" style="width: 0%">0% Uploading file/s</div>
+								</div>
+								<div id="uploadStatus"></div>
 							</div>
-							<div id="uploadStatus"></div>
 						</div>
-					</div>
-					<div class="form-group row mb-3">
-						<div class="col-auto offset-sm-2">
-							<button type="submit" class="btn btn-sm btn-outline-secondary" id="submitButton" >Submit</button>
+						<div class="form-group row mb-3">
+							<div class="col-auto offset-sm-2">
+								<button type="submit" class="btn btn-sm btn-outline-secondary" id="submitButton" >Submit</button>
+							</div>
 						</div>
 					</div>
 				</form>
@@ -140,53 +143,48 @@
 			});
 
 			// File upload via Ajax
-			$("#uploadForm").on('submit', function(e){
-				e.preventDefault();
-				$.ajax({
-					xhr: function() {
-						var xhr = new window.XMLHttpRequest();
-						xhr.upload.addEventListener("progress", function(evt) {
-							if (evt.lengthComputable) {
-								var percentComplete = ((evt.loaded / evt.total) * 100);
-								$(".progress-bar").width(percentComplete.toPrecision(4) + '%');
-								$(".progress-bar").html(percentComplete.toPrecision(4) +'%');
-							}
-						}, false);
-						return xhr;
-					},
-					type: 'POST',
-					url: '{{ route('interview.store') }}',
-					data: new FormData(this),
-					contentType: false,
-					cache: false,
-					processData:false,
-					beforeSend: function(){
-						$(".progress-bar").width('0%');
-						$('#uploadStatus').html('<i class="fa-solid fa-spinner fa-spin-pulse fa-beat-fade"></i>');
-					},
-					error:function(resp){
-						const res = resp.responseJSON;
-						// $('#uploadStatus').html('<p class="text-danger">' + res.message + '</p>');
-						Swal.fire('Error!', res.message,'error')
-						.then(function(){
-							window.location.reload(true);
-						});
-					},
-					success: function(resp){
-						console.log(resp);
-						// if(resp.status == 'success'){
-						// 	$('#uploadForm')[0].reset();
-						// 	$('#uploadStatus').html('<p class="text-success">File has uploaded successfully!</p>');
-						// }else if(resp.status == 'error'){
-						// 	$('#uploadStatus').html('<p style="color:#EA4335;">Please select a valid file to upload.</p>');
-						// }
-							Swal.fire(resp.status + '!', resp.message, resp.status)
-							.then(function(){
-								window.location.reload(true);
-							});
-					}
-				});
-			});
+		//	$("#uploadForm").on('submit', function(e){
+		//		e.preventDefault();
+		//		$.ajax({
+		//			xhr: function() {
+		//				var xhr = new window.XMLHttpRequest();
+		//				xhr.upload.addEventListener("progress", function(evt) {
+		//					if (evt.lengthComputable) {
+		//						var percentComplete = ((evt.loaded / evt.total) * 100);
+		//						$(".progress-bar").width(percentComplete.toPrecision(4) + '%');
+		//						$(".progress-bar").html(percentComplete.toPrecision(4) +'%');
+		//					}
+		//				}, false);
+		//				// console.log(xhr);
+		//				return xhr;
+		//			},
+		//			type: 'POST',
+		//			url: '{{ route('interview.store') }}',
+		//			data: new FormData(this),
+		//			contentType: false,
+		//			cache: false,
+		//			processData:false,
+		//			beforeSend: function(){
+		//				$(".progress-bar").width('0%');
+		//				$('#uploadStatus').html('<i class="fa-solid fa-spinner fa-spin-pulse fa-beat-fade"></i>');
+		//			},
+		//			error:function(resp){
+		//				const res = resp.responseJSON;
+		//				Swal.fire('Error!', res.message,'error')
+		//				.then(function(){
+		//					window.location.reload(true);
+		//				});
+		//			},
+		//			success: function(jqXHR, resp, errorThrown){
+		//				console.log([jqXHR, resp, errorThrown]);
+
+		//				Swal.fire(resp.status + '!', resp.message, resp.status)
+		//				.then(function(){
+		//					window.location.reload(true);
+		//				});
+		//			}
+		//		});
+		//	});
 
 			// File type validation
 			$("#fileInput").change(function(){
@@ -261,5 +259,5 @@
 
 
 </script>
-
+@livewireScripts
 </html>

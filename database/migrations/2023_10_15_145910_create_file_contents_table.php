@@ -12,15 +12,17 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('file_contents', function (Blueprint $table) {
+            $table->charset = 'utf8mb4';
+            $table->collation = 'utf8mb4_unicode_ci';
             $table->id();
-            $table->string('UNIQUE_KEY');
-            $table->string('PRODUCT_TITLE');
-            $table->string('PRODUCT_DESCRIPTION');
-            $table->string('STYLE#');
-            $table->string('SANMAR_MAINFRAME_COLOR');
-            $table->string('SIZE');
-            $table->string('COLOR_NAME');
-            $table->string('PIECE_PRICE');
+            $table->integer('UNIQUE_KEY')->unique();
+            $table->string('PRODUCT_TITLE')->nullable();
+            $table->text('PRODUCT_DESCRIPTION')->nullable();
+            $table->string('STYLE#')->nullable();
+            $table->text('SANMAR_MAINFRAME_COLOR')->nullable();
+            $table->string('SIZE')->nullable();
+            $table->string('COLOR_NAME')->nullable();
+            $table->float('PIECE_PRICE', 8, 2)->nullable();
             $table->timestamps();
         });
     }

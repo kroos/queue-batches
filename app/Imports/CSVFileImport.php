@@ -11,28 +11,34 @@ use \App\Helpers\Encoding;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\Importable;
+// use Maatwebsite\Excel\Concerns\WithEvents;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithUpserts;
 use Maatwebsite\Excel\Concerns\WithUpsertColumns;
 use Maatwebsite\Excel\Concerns\WithBatchInserts;
 use Maatwebsite\Excel\Concerns\RemembersRowNumber;
 use Maatwebsite\Excel\Concerns\WithChunkReading;
-use Maatwebsite\Excel\Concerns\WithProgressBar;
 use Maatwebsite\Excel\Imports\HeadingRowFormatter;
 use Maatwebsite\Excel\Concerns\WithCustomCsvSettings;
 
-class CSVFileImport implements ToModel, WithUpserts, WithUpsertColumns, WithBatchInserts/*, WithChunkReading, WithProgressBar*/, WithHeadingRow, WithCustomCsvSettings
+class CSVFileImport implements ToModel, WithUpserts, WithUpsertColumns, WithBatchInserts, WithChunkReading, WithHeadingRow, WithCustomCsvSettings, ShouldQueue
 // class CSVFileImport implements ToCollection/*, WithHeadingRow*/
 {
 	use RemembersRowNumber, Importable;
 
+	private $rows = 1;
+
 	public function model(array $row)
 	// public function collection(Collection $rows)
 	{
+		HeadingRowFormatter::default('none');
+
+		++$this->rows;
+
 		// Remembering row numbers is only intended for ToModel imports.
 		$currentRowNumber = $this->getRowNumber();
-
-		HeadingRowFormatter::default('none');
+		// dump($currentRowNumber);
 
 		return new FileContent([
 			// 'unique_key' => Encoding::fixUTF8($row[0]),
@@ -72,19 +78,25 @@ class CSVFileImport implements ToModel, WithUpserts, WithUpsertColumns, WithBatc
 	// 	return 2;
 	// }
 
-	public function batchSize(): int
+	public function getRowCount(): int
 	{
-		return 200;
+		return $this->rows;
 	}
 
-	// public function chunkSize(): int
-	// {
-	// 	return 1000;
-	// }
+	public function batchSize(): int
+	{
+		return 1000;
+	}
+
+	public function chunkSize(): int
+	{
+		return 1000;
+	}
 
 	public function uniqueBy()
 	{
 		return 'UNIQUE_KEY';
+		// must set unique at column of the table
 	}
 
 	// if a user already exists, only "name" and "role" columns will be updated.

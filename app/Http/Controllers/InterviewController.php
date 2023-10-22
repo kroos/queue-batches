@@ -9,8 +9,8 @@ use App\Models\Interview;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\CSVFileImport;
 
-// load utf8 encoding
-use \App\Helpers\Encoding;
+// load queues
+use App\Jobs\ProcessCSV;
 
 // load validation
 use App\Http\Requests\StoreInterviewRequest;
@@ -39,7 +39,6 @@ class InterviewController extends Controller
 	 */
 	public function index(): View
 	{
-		return view('index');
 	}
 
 	/**
@@ -47,7 +46,7 @@ class InterviewController extends Controller
 	 */
 	public function create(): View
 	{
-		//
+		return view('index');
 	}
 
 	/**
@@ -55,9 +54,8 @@ class InterviewController extends Controller
 	 */
 	public function store(StoreInterviewRequest $request)/*: RedirectResponse*/
 	{
-		ini_set('max_execution_time', 3000);
+		// ini_set('max_execution_time', 0);
 		// try{
-			// dd($request->file('csv'));
 			if($request->file('csv')){
 				foreach ($request->file('csv') as $v) {
 					$file = $v->getClientOriginalName();
@@ -65,8 +63,9 @@ class InterviewController extends Controller
 					$fileName = $currentDate . '_' . $file;
 					// Store File in Storage Folder
 					// $request->csv->storeAs('public/csv', $fileName);
-					$v->storeAs('public/csv', $fileName);
-					// storage/app/uploads/file.png
+					$filePath = $v->storeAs('public/csv', $fileName);
+					// dd($filePath, storage_path('app/'.$filePath));
+					// storage/app/public/csv/file.png
 					// Store File in Public Folder
 					// $request->csv->move(public_path('uploads'), $fileName);
 					// public/uploads/file.png
@@ -78,14 +77,24 @@ class InterviewController extends Controller
 					// populate data from csv to DB
 					// $collection = Excel::toCollection(new CSVFileImport, $v);
 
-					$import = Excel::import(new CSVFileImport, $v);
-					$l->update(['status' => 'Success']);
+					$import = new CSVFileImport;
+					// Excel::import($import, $v);
+
+					// straight away to queue, no need to dispatch as its been taken care by laravel excel
+					$importData = (new CSVFileImport)->queue($v);
+					// dd($importData);
+					// dispatch(new ProcessCSV($filePath));
+
+					// $l->update(['status' => 'Success']);
 				}
-				$resp = ['status' => 'success', 'message' => 'File Upload And Process Successfully!!'];
-				return response()->json($resp);
+				$resp = [
+							'status' => 'success',
+							'message' => 'File Upload And Process Successfully!!',
+						];
+				// return response()->json($resp);
 			}
-		// }catch(\Exception $e){
-			// $l->update(['status' => 'Failed']);
+		// } catch(\Exception $e){
+		// 	$l->update(['status' => 'Failed']);
 		// 	$resp = ['status' => 'error', 'message' => 'Failed to process uploaded file/s!'];
 		// 	return response()->json($resp);
 		// }

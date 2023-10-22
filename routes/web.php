@@ -14,18 +14,11 @@ use App\Http\Controllers\InterviewController;
 |
 */
 
-Route::get('/', [InterviewController::class, 'index']);
+Route::get('/', [InterviewController::class, 'create']);
 
 Route::resources([
 	'interview' => InterviewController::class,
 ]);
-
-
-
-
-
-
-
 
 
 
