@@ -57,9 +57,9 @@ class CSVFileImport implements ToModel, WithUpserts, WithUpsertColumns, WithBatc
 			// 'SIZE' => Encoding::fixUTF8($row[18]),
 			// 'COLOR_NAME' => Encoding::fixUTF8($row[14]),
 			// 'PIECE_PRICE' => Encoding::fixUTF8($row[21]),
-			'UNIQUE_KEY' => Encoding::fixUTF8($row['unique_key']),
+			'UNIQUE_KEY' => $row['unique_key'],
 			'PRODUCT_TITLE' => Encoding::fixUTF8($row['product_title']),
-			'PRODUCT_DESCRIPTION' => Encoding::fixUTF8($row['product_description']),
+			'PRODUCT_DESCRIPTION' => Encoding::fixUTF8(str_replace(' ', '', $row['product_description'])),
 			'STYLE#' => Encoding::fixUTF8($row['style']),
 			'SANMAR_MAINFRAME_COLOR' => Encoding::fixUTF8($row['sanmar_mainframe_color']),
 			'SIZE' => Encoding::fixUTF8($row['size']),
@@ -90,7 +90,7 @@ class CSVFileImport implements ToModel, WithUpserts, WithUpsertColumns, WithBatc
 
 	public function chunkSize(): int
 	{
-		return 1000;
+		return 500;
 	}
 
 	public function uniqueBy()
