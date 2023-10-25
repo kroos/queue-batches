@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 // load model
 use App\Models\Interview;
+use App\Models\JobBatch;
 
 // load excel/csv/xls import/upload
 // use Maatwebsite\Excel\Facades\Excel;
@@ -17,6 +18,7 @@ use App\Jobs\ProcessCSV;
 use \App\Helpers\Encoding;
 
 // load validation
+use Illuminate\Http\Request;
 use App\Http\Requests\StoreInterviewRequest;
 use App\Http\Requests\UpdateInterviewRequest;
 
@@ -32,10 +34,16 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Support\Arr;
 
-// load facade
+// load db facade
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 
+// load batch and queue
+use Illuminate\Bus\Batch;
+use Illuminate\Support\Facades\Bus;
+use Throwable;
+
+use Log;
 use Exception;
 
 class InterviewController extends Controller
@@ -66,7 +74,7 @@ class InterviewController extends Controller
 		ini_set('max_input_time', '-1');
 		ini_set('max_execution_time', 0);
 		ini_set('memory_limit', '2048M');
-		// try{
+		try{
 			if($request->file('csv')){
 				foreach ($request->file('csv') as $v) {
 					$file = $v->getClientOriginalName();
@@ -118,30 +126,30 @@ class InterviewController extends Controller
 					$dataFromCsv = array_chunk($dataFromCsv, 1000);
 					// dd($dataFromCsv);
 
+					$batch = Bus::batch([])->dispatch();
+
 					// looping through each chunk
 					foreach ($dataFromCsv as $index => $dataCsv) {
 						foreach ($dataCsv as $data) {
 							$mydata[$index][] = array_combine($header, $data);
 						}
-						ProcessCSV::dispatch($mydata[$index]);
+						// ProcessCSV::dispatch($mydata[$index]);
+						$batch->add(new ProcessCSV($mydata[$index]));
 					}
 					// dd($mydata);
-
-
-
-
 				}
+				session()->put('lastBatchId', $batch->id);
+				return redirect()->route('interview.progress', ['id' => $batch->id]);
 				// $resp = [
 				// 			'status' => 'success',
 				// 			'message' => 'File Upload And Process Successfully!!',
 				// 		];
 				// return response()->json($resp);
 			}
-		// } catch(\Exception $e){
-		// 	$l->update(['status' => 'Failed']);
-		// 	$resp = ['status' => 'error', 'message' => 'Failed to process uploaded file/s!'];
-		// 	return response()->json($resp);
-		// }
+		} catch(\Exception $e){
+			// $resp = ['status' => 'error', 'message' => 'Failed to process uploaded file/s!'];
+			return $e;
+		}
 	}
 
 	/**
@@ -174,5 +182,20 @@ class InterviewController extends Controller
 	public function destroy(Interview $interview): JsonResponse
 	{
 		//
+	}
+
+	public function progress(Request $request): JsonResponse
+	{
+		try {
+			$batchId = $request->id ?? session()->get('lastBatchId');
+
+			if (JobBatch::where('id', $batchId)->count()) {
+				$response = JobBatch::where('id', $batchId)->first();
+				return response()->json($response);
+			}
+		} catch (Exception $e) {
+			Log::error($e);
+			dd($e);
+		}
 	}
 }

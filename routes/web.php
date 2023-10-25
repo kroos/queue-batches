@@ -21,6 +21,6 @@ Route::resources([
 ]);
 
 
-
+Route::get('/progress', [InterviewController::class, 'progress'])->name('interview.progress');
 
 
