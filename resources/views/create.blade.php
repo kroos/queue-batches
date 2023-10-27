@@ -30,7 +30,6 @@
 
 	<script type="module" src="{{ asset('js/pc-bootstrap4-datetimepicker/build/js/bootstrap-datetimepicker.min.js') }}"></script>
 	<link href="{{ asset('js/pc-bootstrap4-datetimepicker/build/css/bootstrap-datetimepicker.css') }}" rel="stylesheet">
-	@livewireStyles
 </head>
 <body>
 	<div class="container-fluid justify-content-center align-items-start">
@@ -259,5 +258,4 @@
 
 
 </script>
-@livewireScripts
 </html>

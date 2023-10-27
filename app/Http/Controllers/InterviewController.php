@@ -7,8 +7,8 @@ use App\Models\Interview;
 use App\Models\JobBatch;
 
 // load excel/csv/xls import/upload
-// use Maatwebsite\Excel\Facades\Excel;
-// use App\Imports\CSVFileImport;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Imports\CSVFileImport;
 
 // load queues
 use App\Jobs\ProcessCSV;
@@ -91,63 +91,30 @@ class InterviewController extends Controller
 					$data = ['file' => $fileName];
 					$l = Interview::create($data);
 
-					// $lfile = storage_path('app/public/csv/'.$fileName);
+					$lfile = storage_path('app/public/csv/'.$fileName);
 
 					// populate data from csv to DB
-					// $import = new CSVFileImport;
-					// $importData = Excel::toCollection($import, $v);
+					// $importData = Excel::toCollection(new CSVFileImport, $lfile);
+					// $importData = (new CSVFileImport)->toCollection($lfile);
 
-					// $importData = Excel::import($import, $v);
+					// $importData = Excel::toArray(new CSVFileImport, $lfile);
+					// $importData = (new CSVFileImport)->toArray($lfile);
+
+					// $importData = Excel::import(new CSVFileImport, $lfile);
+					// $importData = (new CSVFileImport)->import($lfile);
 
 					// straight away to queue, no need to dispatch as its been taken care by laravel excel
-					// $importData = $import->queue($v);
+					// $importData = Excel::queueImport(new CSVFileImport, $lfile);
+					// $importData = (new CSVFileImport)->queue($lfile);
 					// dd($importData);
 
-					$header = null;
-					$dataFromCsv = [];
-
-					// read csv file
-					$records = array_map('str_getcsv', file(storage_path('app/'.$filePath)));
-					// dd($records);
-
-					// rearrange the data n make sure all the data were in UTF-8
-					foreach ($records as $record) {
-						// remove all non UTF-8 from data
-						$record = preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $record);
-						if (!$header) {
-							$header = $record ;
-						} else {
-							$dataFromCsv[] = Encoding::fixUTF8($record);
-						}
-					}
-					// dd($header, $dataFromCsv);
-
-					// breaking data to chunks
-					$dataFromCsv = array_chunk($dataFromCsv, 1000);
-					// dd($dataFromCsv);
-
-					$batch = Bus::batch([])->dispatch();
-
-					// looping through each chunk
-					foreach ($dataFromCsv as $index => $dataCsv) {
-						foreach ($dataCsv as $data) {
-							$mydata[$index][] = array_combine($header, $data);
-						}
-						// ProcessCSV::dispatch($mydata[$index]);
-						$batch->add(new ProcessCSV($mydata[$index]));
-					}
-					// dd($mydata);
+					$batch = Bus::batch([ new ProcessCSV($lfile) ])->dispatch();
 				}
+
 				session()->put('lastBatchId', $batch->id);
 				return redirect()->route('interview.progress', ['id' => $batch->id]);
-				// $resp = [
-				// 			'status' => 'success',
-				// 			'message' => 'File Upload And Process Successfully!!',
-				// 		];
-				// return response()->json($resp);
 			}
 		} catch(\Exception $e){
-			// $resp = ['status' => 'error', 'message' => 'Failed to process uploaded file/s!'];
 			return $e;
 		}
 	}

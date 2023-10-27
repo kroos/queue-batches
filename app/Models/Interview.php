@@ -12,9 +12,10 @@ class Interview extends Model
 {
 	use HasFactory;
 	protected $table = 'files';
-	protected $fillable = [
-		'file', 'status',
-	];
+	protected $guarded = [];
+	// protected $fillable = [
+	// 	'file', 'status',
+	// ];
 
 	public function hasmanycontents(): HasMany
 	{
