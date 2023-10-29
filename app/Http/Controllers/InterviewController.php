@@ -7,8 +7,8 @@ use App\Models\Interview;
 use App\Models\JobBatch;
 
 // load excel/csv/xls import/upload
-use Maatwebsite\Excel\Facades\Excel;
-use App\Imports\CSVFileImport;
+// use Maatwebsite\Excel\Facades\Excel;
+// use App\Imports\CSVFileImport;
 
 // load queues
 use App\Jobs\ProcessCSV;
@@ -48,25 +48,11 @@ use Exception;
 
 class InterviewController extends Controller
 {
-	/**
-	 * Display a listing of the resource.
-	 */
 	public function index(): View
 	{
 		return view('create');
 	}
 
-	/**
-	 * Show the form for creating a new resource.
-	 */
-	public function create(): View
-	{
-		return view('create');
-	}
-
-	/**
-	 * Store a newly created resource in storage.
-	 */
 	public function store(StoreInterviewRequest $request)/*: RedirectResponse*/
 	{
 		ini_set('post_max_size', '512MB');
@@ -93,62 +79,57 @@ class InterviewController extends Controller
 
 					$lfile = storage_path('app/public/csv/'.$fileName);
 
-					// populate data from csv to DB
-					// $importData = Excel::toCollection(new CSVFileImport, $lfile);
-					// $importData = (new CSVFileImport)->toCollection($lfile);
+					// insert data file into db
+					// $l = Interview::create($data);
 
-					// $importData = Excel::toArray(new CSVFileImport, $lfile);
-					// $importData = (new CSVFileImport)->toArray($lfile);
+					$header = null;
+					$data = [];
+					$records = array_map('str_getcsv', file($lfile));
+					// dd($records);
 
-					// $importData = Excel::import(new CSVFileImport, $lfile);
-					// $importData = (new CSVFileImport)->import($lfile);
+					// split header and data
+					foreach ($records as $record => $v1) {
 
-					// straight away to queue, no need to dispatch as its been taken care by laravel excel
-					// $importData = Excel::queueImport(new CSVFileImport, $lfile);
-					// $importData = (new CSVFileImport)->queue($lfile);
-					// dd($importData);
+						// sanitize all non UTF-8 from csv data and convert all of it into UTF-8 also remove BOM
+						foreach ($v1 as $v2) {
+							$g[$record][] = Encoding::fixUTF8(preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $v2));
+						}
 
-					$batch = Bus::batch([ new ProcessCSV($lfile) ])->dispatch();
+						if (!$header) {
+							$header = $g[$record];
+						} else {
+							$data[] = $g[$record];
+						}
+					}
+					// dd($header, $data);
+
+					// edit int
+					$data = array_chunk($data, 5);
+					// dd($data);
+
+					$batch = Bus::batch([])->name($fileName)->dispatch();
+
+					// combine header and data
+					foreach ($data as $index => $values) {
+						foreach ($values as $dataval) {
+							// combine header with data and pickup column that we need
+							$datacsv[$index][] = Arr::add(Arr::only(array_combine($header, $dataval), ['UNIQUE_KEY', 'PRODUCT_TITLE', 'PRODUCT_DESCRIPTION', 'STYLE#', 'SANMAR_MAINFRAME_COLOR', 'SIZE', 'COLOR_NAME', 'PIECE_PRICE']), 'file_id', $l->id);
+						}
+						// dd($datacsv[$index]);
+
+						// call queues by chunk
+						// ProcessCSV::dispatch($datacsv[$index]);
+
+						// we need a progress so we use batch n comment out the queue above
+						$batch->add(new ProcessCSV($datacsv[$index]));
+					}
 				}
-
 				session()->put('lastBatchId', $batch->id);
-				return redirect()->route('interview.progress', ['id' => $batch->id]);
+				return response()->json(route('interview.index', ['id' => $batch->id]));
 			}
 		} catch(\Exception $e){
 			return $e;
 		}
-	}
-
-	/**
-	 * Display the specified resource.
-	 */
-	public function show(Interview $interview): View
-	{
-		//
-	}
-
-	/**
-	 * Show the form for editing the specified resource.
-	 */
-	public function edit(Interview $interview): View
-	{
-		//
-	}
-
-	/**
-	 * Update the specified resource in storage.
-	 */
-	public function update(UpdateInterviewRequest $request, Interview $interview): RedirectResponse
-	{
-		//
-	}
-
-	/**
-	 * Remove the specified resource from storage.
-	 */
-	public function destroy(Interview $interview): JsonResponse
-	{
-		//
 	}
 
 	public function progress(Request $request): JsonResponse

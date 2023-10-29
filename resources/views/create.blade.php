@@ -80,7 +80,7 @@
 							<label for="fileInput" class="col-form-label form-label-sm col-sm-2">Upload :</label>
 							<div class="col-auto">
 								<input name="csv[]" class="form-control form-control-sm col-auto" id="fileInput" type="file" aria-describedby="progressbar1" multiple>
-								<div id="progressbar1" class="form-text">Progress Bar</div>
+								<div id="progressbar1" class="form-text">Upload File Progress</div>
 								<div id="progressBar" class="progress" role="progressbar" aria-label="Progress Bar with label" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
 									<div class="progress-bar percent" id="percent" style="width: 0%">0% Uploading file/s</div>
 								</div>
@@ -117,7 +117,7 @@
 
 			$("#accordion").accordion();
 
-			console.log(moment().format('LLLL'));
+			// console.log(moment().format('LLLL'));
 
 			$('#datepicker').datetimepicker();
 
@@ -142,48 +142,51 @@
 			});
 
 			// File upload via Ajax
-		//	$("#uploadForm").on('submit', function(e){
-		//		e.preventDefault();
-		//		$.ajax({
-		//			xhr: function() {
-		//				var xhr = new window.XMLHttpRequest();
-		//				xhr.upload.addEventListener("progress", function(evt) {
-		//					if (evt.lengthComputable) {
-		//						var percentComplete = ((evt.loaded / evt.total) * 100);
-		//						$(".progress-bar").width(percentComplete.toPrecision(4) + '%');
-		//						$(".progress-bar").html(percentComplete.toPrecision(4) +'%');
-		//					}
-		//				}, false);
-		//				// console.log(xhr);
-		//				return xhr;
-		//			},
-		//			type: 'POST',
-		//			url: '{{ route('interview.store') }}',
-		//			data: new FormData(this),
-		//			contentType: false,
-		//			cache: false,
-		//			processData:false,
-		//			beforeSend: function(){
-		//				$(".progress-bar").width('0%');
-		//				$('#uploadStatus').html('<i class="fa-solid fa-spinner fa-spin-pulse fa-beat-fade"></i>');
-		//			},
-		//			error:function(resp){
-		//				const res = resp.responseJSON;
-		//				Swal.fire('Error!', res.message,'error')
-		//				.then(function(){
-		//					window.location.reload(true);
-		//				});
-		//			},
-		//			success: function(jqXHR, resp, errorThrown){
-		//				console.log([jqXHR, resp, errorThrown]);
+			$("#uploadForm").on('submit', function(e){
+				e.preventDefault();
+				$.ajax({
+					xhr: function() {
+						var xhr = new window.XMLHttpRequest();
+						xhr.upload.addEventListener("progress", function(evt) {
+							if (evt.lengthComputable) {
+								// Declaring JavaScript global variable within function
+								window.percentComplete = ((evt.loaded / evt.total) * 100);
+								$(".progress-bar").width(percentComplete.toPrecision(4) + '%');
+								$(".progress-bar").html(percentComplete.toPrecision(4) +'%');
+							}
+						}, false);
+						// console.log(xhr);
+						return xhr;
+					},
+					type: 'POST',
+					url: '{{ route('interview.store') }}',
+					data: new FormData(this),
+					contentType: false,
+					cache: false,
+					processData:false,
+					beforeSend: function(){
+						$(".progress-bar").width('0%');
+						$('#uploadStatus').html('<i class="fa-solid fa-spinner fa-spin-pulse fa-beat-fade"></i>');
+					},
+					error:function(resp){
+						const res = resp.responseJSON;
+						Swal.fire('Error!', res.message,'error')
+						.then(function(){
+							window.location.reload(true);
+						});
+					},
+					success: function(jqXHR, resp, errorThrown){
+						console.log([jqXHR, resp, errorThrown]);
+						if (percentComplete == 100) {
+							window.location.reload(true);
+							window.location.replace(jqXHR);
+						}
 
-		//				Swal.fire(resp.status + '!', resp.message, resp.status)
-		//				.then(function(){
-		//					window.location.reload(true);
-		//				});
-		//			}
-		//		});
-		//	});
+
+
+					}
+				});
+			});
 
 			// File type validation
 			$("#fileInput").change(function(){

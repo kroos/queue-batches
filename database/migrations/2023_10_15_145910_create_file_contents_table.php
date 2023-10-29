@@ -15,6 +15,7 @@ return new class extends Migration
             $table->charset = 'utf8mb4';
             $table->collation = 'utf8mb4_unicode_ci';
             $table->id();
+            $table->integer('file_id')->nullable();
             $table->integer('UNIQUE_KEY')->unique();
             $table->string('PRODUCT_TITLE')->nullable();
             $table->text('PRODUCT_DESCRIPTION')->nullable();

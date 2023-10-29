@@ -14,13 +14,8 @@ use App\Http\Controllers\InterviewController;
 |
 */
 
-Route::get('/', [InterviewController::class, 'create']);
-
-Route::resources([
-	'interview' => InterviewController::class,
-]);
-
-
+Route::get('/', [InterviewController::class, 'index'])->name('interview.index');
+Route::post('/store', [InterviewController::class, 'store'])->name('interview.store');
 Route::get('/progress', [InterviewController::class, 'progress'])->name('interview.progress');
 
 
