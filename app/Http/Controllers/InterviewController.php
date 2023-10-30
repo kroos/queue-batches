@@ -74,7 +74,7 @@ class InterviewController extends Controller
 
 					// Store File in Public Folder
 					// $request->csv->move(public_path('uploads'), $fileName);
-					$data = ['file' => $fileName];
+					$data = ['file' => $fileName, 'ori_file' => $file];
 					$l = Interview::create($data);
 
 					$lfile = storage_path('app/public/csv/'.$fileName);
@@ -107,7 +107,8 @@ class InterviewController extends Controller
 					$data = array_chunk($data, 5);
 					// dd($data);
 
-					$batch = Bus::batch([])->name($fileName)->dispatch();
+					// $batch = Bus::batch([])->name($fileName)->dispatch();
+					$batch = Bus::batch([])->name($file)->dispatch();
 
 					// combine header and data
 					foreach ($data as $index => $values) {
@@ -124,7 +125,7 @@ class InterviewController extends Controller
 						$batch->add(new ProcessCSV($datacsv[$index]));
 					}
 				}
-				session()->put('lastBatchId', $batch->id);
+				session(['lastBatchId' => $batch->id]);
 				return response()->json(route('interview.index', ['id' => $batch->id]));
 			}
 		} catch(\Exception $e){

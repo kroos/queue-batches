@@ -77,7 +77,7 @@
 					@csrf
 					<div class="row justify-content-center">
 						<div class="form-group row mb-3 {{ $errors->has('reason') ? 'has-error' : '' }}">
-							<label for="fileInput" class="col-form-label form-label-sm col-sm-2">Upload :</label>
+							<label for="fileInput" class="col-form-label form-label-sm col-auto">Upload :</label>
 							<div class="col-auto">
 								<input name="csv[]" class="form-control form-control-sm col-auto" id="fileInput" type="file" aria-describedby="progressbar1" multiple>
 								<div id="progressbar1" class="form-text">Upload File Progress</div>
@@ -94,6 +94,52 @@
 						</div>
 					</div>
 				</form>
+				<p>&nbsp;</p>
+<?php
+use Illuminate\Http\Request;
+?>
+				<div id="processcsv" class="row col-sm-12">
+@if(request()->id || request()->session()->exists('lastBatchId') )
+					<div class="progress col-sm-12" role="progressbar" aria-label="CSV Processing" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+						<div class="progress-bar csvprogress" style="width: 0%">0% CSV Processing</div>
+					</div>
+					<p>&nbsp;</p>
+					<div class="table-responsive">
+						<table class="table table-hover table-sm">
+							<thead>
+								<tr>
+									<th>File</th>
+									<th>Pending</th>
+									<th>Success</th>
+									<th>Failed</th>
+								</tr>
+							</thead>
+							<tbody class=" table-group-divider">
+@foreach(\App\Models\JobBatch::all() as $v)
+								<tr>
+									<td>{{ $v->name }}</td>
+									<td>{{ ($v->pending_jobs == 0)?'No Pending':'Pending' }}</td>
+									<td>
+										@if($v->pending_jobs == 0 && $v->failed_jobs == 0)
+											Success
+										@else
+											@if($v->pending_jobs > 0 && $v->failed_jobs == 0)
+												Not Yet Process
+											@else
+												@if($v->pending_jobs == 0 && $v->failed_jobs > 0)
+													Process With Fail
+												@endif
+											@endif
+										@endif
+									</td>
+									<td>{{ ($v->failed_jobs == 0)?'No Failed':'Failed' }}</td>
+								</tr>
+@endforeach
+							</tbody>
+						</table>
+					</div>
+@endif
+				</div>
 			</div>
 		</div>
 	</div>
@@ -141,6 +187,34 @@
 				});
 			});
 
+
+
+			@if( request()->id || session()->exists('lastBatchId') )
+				<?php $batchId = $request->id ?? session()->get('lastBatchId'); ?>
+				setInterval(percent, 500);
+				function percent() {
+					// console.log('test');
+					// window.percentComplete = ((evt.loaded / evt.total) * 100);
+					// $(".csvprogress").width(percentComplete.toPrecision(4) + '%');
+					// $(".csvprogress").html(percentComplete.toPrecision(4) +'%');
+
+					$.ajax({
+						url: '{{ route('interview.progress', ['id' => $batchId]) }}',
+						type: "GET",
+						data: { _token: '{{ csrf_token() }}'},
+						dataType: 'json',
+						success: function (response) {
+							// var resp = response.responseJSON;
+							// return resp;
+							console.log(response);
+						},
+						error: function(jqXHR, textStatus, errorThrown) {
+							// console.log(textStatus, errorThrown);
+						}
+					})
+				}
+			@endif
+
 			// File upload via Ajax
 			$("#uploadForm").on('submit', function(e){
 				e.preventDefault();
@@ -176,14 +250,11 @@
 						});
 					},
 					success: function(jqXHR, resp, errorThrown){
-						console.log([jqXHR, resp, errorThrown]);
+						// console.log([jqXHR, resp, errorThrown]);
 						if (percentComplete == 100) {
-							window.location.reload(true);
-							window.location.replace(jqXHR);
+							// window.location.reload(true);
+							window.location.replace(jqXHR);					// redirect action
 						}
-
-
-
 					}
 				});
 			});
