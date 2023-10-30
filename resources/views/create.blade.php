@@ -82,7 +82,7 @@
 								<input name="csv[]" class="form-control form-control-sm col-auto" id="fileInput" type="file" aria-describedby="progressbar1" multiple>
 								<div id="progressbar1" class="form-text">Upload File Progress</div>
 								<div id="progressBar" class="progress" role="progressbar" aria-label="Progress Bar with label" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
-									<div class="progress-bar percent" id="percent" style="width: 0%">0% Uploading file/s</div>
+									<div class="progress-bar percent_upload" id="percent" style="width: 0%">0% Uploading file/s</div>
 								</div>
 								<div id="uploadStatus"></div>
 							</div>
@@ -99,7 +99,7 @@
 use Illuminate\Http\Request;
 ?>
 				<div id="processcsv" class="row col-sm-12">
-@if(request()->id || request()->session()->exists('lastBatchId') )
+@if(\App\Models\JobBatch::count() )
 					<div class="progress col-sm-12" role="progressbar" aria-label="CSV Processing" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
 						<div class="progress-bar csvprogress" style="width: 0%">0% CSV Processing</div>
 					</div>
@@ -189,15 +189,10 @@ use Illuminate\Http\Request;
 
 
 
-			@if( request()->id || session()->exists('lastBatchId') )
+			@if( request()->id && session()->exists('lastBatchId') )
 				<?php $batchId = $request->id ?? session()->get('lastBatchId'); ?>
-				setInterval(percent, 500);
+				setInterval(percent, 5);
 				function percent() {
-					// console.log('test');
-					// window.percentComplete = ((evt.loaded / evt.total) * 100);
-					// $(".csvprogress").width(percentComplete.toPrecision(4) + '%');
-					// $(".csvprogress").html(percentComplete.toPrecision(4) +'%');
-
 					$.ajax({
 						url: '{{ route('interview.progress', ['id' => $batchId]) }}',
 						type: "GET",
@@ -206,7 +201,19 @@ use Illuminate\Http\Request;
 						success: function (response) {
 							// var resp = response.responseJSON;
 							// return resp;
-							console.log(response);
+							var total = parseInt(response.total_jobs);
+							var pending = parseInt(response.pending_jobs);
+							var job_done = parseInt(total - pending);
+							window.percentbar = ((job_done / total) * 100);
+							$('.progress').attr('aria-valuenow', percentbar).css('width', percentbar + '%');
+							$(".csvprogress").width(percentbar.toPrecision(4) + '%');
+							$(".csvprogress").html(percentbar.toPrecision(4) +'%');
+							console.log(percentbar);
+							if (percentbar == 100) {
+								clearInterval(percent);
+								window.location.replace('{{ url('/') }}');
+								<?php session()->forget('lastBatchId') ?>
+							}
 						},
 						error: function(jqXHR, textStatus, errorThrown) {
 							// console.log(textStatus, errorThrown);
@@ -225,8 +232,9 @@ use Illuminate\Http\Request;
 							if (evt.lengthComputable) {
 								// Declaring JavaScript global variable within function
 								window.percentComplete = ((evt.loaded / evt.total) * 100);
-								$(".progress-bar").width(percentComplete.toPrecision(4) + '%');
-								$(".progress-bar").html(percentComplete.toPrecision(4) +'%');
+								$('#progressBar').attr('aria-valuenow', percentComplete).css('width', percentComplete+'%');
+								$(".percent_upload").width(percentComplete.toPrecision(4) + '%');
+								$(".percent_upload").html(percentComplete.toPrecision(4) +'%');
 							}
 						}, false);
 						// console.log(xhr);

@@ -74,13 +74,13 @@ class InterviewController extends Controller
 
 					// Store File in Public Folder
 					// $request->csv->move(public_path('uploads'), $fileName);
-					$data = ['file' => $fileName, 'ori_file' => $file];
+					$data = ['file' => $fileName];
+
+					// insert data file into db
 					$l = Interview::create($data);
 
 					$lfile = storage_path('app/public/csv/'.$fileName);
 
-					// insert data file into db
-					// $l = Interview::create($data);
 
 					$header = null;
 					$data = [];
@@ -104,7 +104,7 @@ class InterviewController extends Controller
 					// dd($header, $data);
 
 					// edit int
-					$data = array_chunk($data, 5);
+					$data = array_chunk($data, 1000);
 					// dd($data);
 
 					// $batch = Bus::batch([])->name($fileName)->dispatch();
