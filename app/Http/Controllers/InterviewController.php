@@ -125,7 +125,7 @@ class InterviewController extends Controller
 						$batch->add(new ProcessCSV($datacsv[$index]));
 					}
 				}
-				session(['lastBatchId' => $batch->id]);
+				Session(['lastBatchId' => $batch->id]);
 				return response()->json(route('interview.index', ['id' => $batch->id]));
 			}
 		} catch(\Exception $e){
