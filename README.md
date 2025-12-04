@@ -1,1 +1,1 @@
-Queuw btach example
+Queue batch example
