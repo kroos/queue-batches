@@ -13,23 +13,8 @@
 	<link rel="dns-prefetch" href="//fonts.gstatic.com">
 	<link href="https://fonts.googleapis.com/css?family=Nunito" rel="stylesheet">
 
-	<script type="text/javascript" src="{{ asset('js/fullcalendar/index.global.js') }}"></script>
+	@vite(['resources/css/app.css', 'resources/scss/app.scss', 'resources/js/app.js'])
 
-	<script type="text/javascript" src="{{ asset('js/moment/moment.js') }}"></script>
-	<script type="text/javascript" src="{{ asset('js/moment-range/dist/moment-range.js') }}"></script>
-
-
-	@vite(['resources/css/app.css', 'resources/js/app.js'])
-
-	<script type="module" src="{{ asset('js/jquery-chained/jquery.chained.js') }}"></script>
-	<script type="module" src="{{ asset('js/jquery-chained/jquery.chained.remote.js') }}"></script>
-
-	<script type="module" src="{{ asset('js/jquery-ui/dist/jquery-ui.js') }}"></script>
-	<link href="{{ asset('js/jquery-ui/dist/themes/base/jquery-ui.css') }}" rel="stylesheet">
-	<link href="{{ asset('js/jquery-ui/dist/themes/base/theme.css') }}" rel="stylesheet">
-
-	<script type="module" src="{{ asset('js/pc-bootstrap4-datetimepicker/build/js/bootstrap-datetimepicker.min.js') }}"></script>
-	<link href="{{ asset('js/pc-bootstrap4-datetimepicker/build/css/bootstrap-datetimepicker.css') }}" rel="stylesheet">
 </head>
 <body>
 	<div class="container-fluid justify-content-center align-items-start">
@@ -150,45 +135,6 @@ use Illuminate\Http\Request;
 		$(document).ready(function(){
 			@section('jquery')
 			@show
-			// alert("Hello\nHow are you?");
-			$('#table').DataTable();
-			$('#select2').select2({
-				theme: 'bootstrap-5',
-			});
-			$('#inline').minicolors({
-				theme: 'default',
-			});
-			// somehow cant make it work
-			$("#series").chainedTo("#mark");
-
-			$("#accordion").accordion();
-
-			// console.log(moment().format('LLLL'));
-
-			$('#datepicker').datetimepicker();
-
-			$('#sweetalert').click(function(){
-				Swal.fire({
-					title: 'Are you sure?',
-					text: "You won't be able to revert this!",
-					icon: 'warning',
-					showCancelButton: true,
-					confirmButtonColor: '#3085d6',
-					cancelButtonColor: '#d33',
-					confirmButtonText: 'Yes, delete it!'
-				}).then((result) => {
-					if (result.isConfirmed) {
-						Swal.fire(
-								  'Deleted!',
-								  'Your file has been deleted.',
-								  'success'
-								  )
-					}
-				});
-			});
-
-
-
 			@if( request()->id && session()->exists('lastBatchId') )
 				<?php $batchId = $request->id ?? session()->get('lastBatchId'); ?>
 				setInterval(percent, 5);
@@ -252,7 +198,7 @@ use Illuminate\Http\Request;
 					},
 					error:function(resp){
 						const res = resp.responseJSON;
-						Swal.fire('Error!', res.message,'error')
+						swal.fire('Error!', res.message,'error')
 						.then(function(){
 							window.location.reload(true);
 						});
@@ -275,7 +221,7 @@ use Illuminate\Http\Request;
 				var fileType = file.type;
 				if(!allowedTypes.includes(fileType)){
 					// alert('Please select a valid file (PDF/DOC/DOCX/JPEG/JPG/PNG/GIF).');
-					Swal.fire('Error!', 'Please select a valid file (CSV file/s only)','error')
+					swal.fire('Error!', 'Please select a valid file (CSV file/s only)','error')
 					.then(function(){
 						window.location.reload(true);
 					});
@@ -286,58 +232,5 @@ use Illuminate\Http\Request;
 
 		});
 	})(jQuery);
-
-	@section('nonjquery')
-	@show
-
-	// chartjs
-	// const ctx = document.getElementById('myChart');
-	// new Chart(ctx, {
-	// 	type: 'bar',
-	// 	data: {
-	// 		labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
-	// 		datasets: [{
-	// 			label: '# of Votes',
-	// 			data: [12, 19, 3, 5, 2, 3],
-	// 			borderWidth: 1
-	// 		}]
-	// 	},
-	// 	options: {
-	// 		scales: {
-	// 			y: {
-	// 				beginAtZero: true
-	// 			}
-	// 		}
-	// 	}
-	// });
-
-	// fullcalendar
-	// document.addEventListener('DOMContentLoaded', function() {
-	// 	const calendarEl = document.getElementById('calendar')
-	// 	const calendar = new FullCalendar.Calendar(calendarEl, {
-	// 		// plugins: [dayGridPlugin],
-	// 		headerToolbar: {
-	// 			left: 'prev,next today',
-	// 			center: 'title',
-	// 			right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
-	// 		}
-	// 	})
-	// 	calendar.render()
-	// });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 </script>
 </html>
