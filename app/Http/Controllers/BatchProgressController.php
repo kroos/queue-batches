@@ -89,7 +89,13 @@ class BatchProgressController extends Controller
 			session()->forget('lastBatchId');
 			session()->forget('Industry_code_NZSIOC');
 			Storage::delete($filePath2);
+
+       // 🔥 Store file path in session so the redirected page can trigger download
+			// session(['downloadFile' => $filePath1]);
+			// session()->flash('downloadFile', $filePath1);
 			return Storage::download($filePath1);
+			return response()->download(storage_path('app/private/'.$filePath1))->deleteFileAfterSend(true);
+			// return redirect()->route('progress.index');
 		}
 		session()->forget('lastBatchId');
 		session()->forget('Industry_code_NZSIOC');
