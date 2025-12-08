@@ -5,10 +5,10 @@ files with real-time progress tracking and job management.
 
 ## 🚀 Features
 
--   **Batch CSV Export** -- Export large datasets in chunks using
+-   **Batch CSV Export** -- Export Import large datasets in chunks using
     Laravel Jobs\
 -   **Real-time Progress Tracking** -- Live progress updates during
-    export\
+    import export\
 -   **Job Management Dashboard** -- View and manage all batch jobs\
 -   **File Management** -- Upload, store, and manage CSV files\
 -   **Authentication System** -- Secure access with email verification\
@@ -28,7 +28,7 @@ files with real-time progress tracking and job management.
     │   └── JobBatch.php                   # Job batch tracking model
     └── Jobs/
         └── ExportCSV.php                  # Batch job for CSV export
-        └── ImportCSV.php                  # Batch job for CSV export
+        └── ImportCSV.php                  # Batch job for CSV import
 
 ## 🛠️ Installation
 
