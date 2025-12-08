@@ -1,59 +1,255 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# CSV Export/Import System
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A Laravel-based batch processing system for exporting and importing CSV
+files with real-time progress tracking and job management.
 
-## About Laravel
+## 🚀 Features
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+-   **Batch CSV Export** -- Export large datasets in chunks using
+    Laravel Jobs\
+-   **Real-time Progress Tracking** -- Live progress updates during
+    export\
+-   **Job Management Dashboard** -- View and manage all batch jobs\
+-   **File Management** -- Upload, store, and manage CSV files\
+-   **Authentication System** -- Secure access with email verification\
+-   **Activity Logging** -- Track user activity in the system
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 📁 Project Structure
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+    app/
+    ├── Http/Controllers/
+    │   ├── ExportCSVController.php        # Handles CSV export operations
+    │   ├── BatchProgressController.php    # Manages batch progress & downloads
+    │   ├── ImportCSVController.php        # Handles CSV import operations
+    │   └── FileEntryController.php        # Manages file entries
+    ├── Models/
+    │   ├── File.php                       # File model with soft deletes
+    │   ├── FileEntry.php                  # File entry model
+    │   └── JobBatch.php                   # Job batch tracking model
+    └── Jobs/
+        └── ExportCSV.php                  # Batch job for CSV export
+        └── ImportCSV.php                  # Batch job for CSV export
 
-## Learning Laravel
+## 🛠️ Installation
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+### 1. Clone the repository
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+``` bash
+git clone https://github.com/kroos/laravel-interview.git
+cd laravel-interview
+```
 
-## Laravel Sponsors
+### 2. Install dependencies
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+``` bash
+composer install
+npm install
+npm run build
+```
 
-### Premium Partners
+### 3. Configure environment
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+``` bash
+cp .env.example .env
+php artisan key:generate
+```
 
-## Contributing
+### 4. Setup database
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+-   Update `.env` with your database credentials\
+-   Run migrations:
 
-## Code of Conduct
+``` bash
+php artisan migrate
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### 5. Configure queue (required for batch processing)
 
-## Security Vulnerabilities
+-   Set `QUEUE_CONNECTION` to `database` or `redis` in `.env`
+-   Start queue worker:
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+``` bash
+php artisan queue:work
+```
 
-## License
+### 6. Start the application
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+``` bash
+php artisan serve
+```
+
+## 🔧 Configuration
+
+### Database Tables
+
+-   **files** -- uploaded file metadata\
+-   **file_entries** -- individual CSV records\
+-   **job_batches** -- batch job progress tracking\
+-   **activity_logs** -- user activity logs
+
+### Routes
+
+Defined inside `routes/auth.php` and `routes/batch.php`:
+
+-   Authentication routes with middleware\
+-   Batch processing routes\
+-   Resource controllers for exports/imports
+
+## 📊 Usage
+
+### 1. Exporting CSV Data
+
+#### a. Navigate to Export Page
+
+Visit:
+
+    /exportcsvs/create
+
+#### b. Filter Data
+
+-   Optional filtering by `Industry_code_NZSIOC`
+-   System processes data in **300-record chunks**
+
+#### c. Monitor Progress
+
+-   Redirected to progress page\
+-   Real-time progress via AJAX\
+-   Download link shown when complete
+
+## ⚙️ Batch Processing
+
+Uses **Laravel Bus Batching**:
+
+``` php
+$batch = Bus::batch($dat)
+    ->name('Export CSV Industry_code_NZSIOC => ' . $request->Industry_code_NZSIOC)
+    ->dispatch();
+```
+
+### Progress Tracking
+
+-   Live updates via:
+
+```{=html}
+<!-- -->
+```
+    GET /getProgress
+
+-   View all jobs:
+
+```{=html}
+<!-- -->
+```
+    GET /getJobBatchTable
+
+-   Temporary files auto-cleaned after download
+
+## 🔐 Security Features
+
+-   Laravel authentication\
+-   Email verification\
+-   Protected routes with:
+    -   `auth`
+    -   `verified`
+    -   `password.confirm`
+-   CSRF protection\
+-   Input validation
+
+## 📈 Performance Optimizations
+
+-   **Chunk Processing** -- 300 rows each\
+-   **Queued Jobs** -- smooth UI\
+-   **Batch Tracking** -- database-backed\
+-   **Streamed CSV** -- efficient file generation
+
+## 🔄 API Endpoints
+
+### Batch Progress
+
+    GET /getProgress
+    GET /getJobBatchTable
+
+### File Operations
+
+    GET /progress/downloadCSV
+    DELETE /file_entries/{fileEntry}
+
+### Resource Routes
+
+``` php
+Route::resources([
+    'importcsvs' => ImportCSVController::class,
+    'exportcsvs' => ExportCSVController::class,
+    'file_entries' => FileEntryController::class,
+]);
+```
+
+## 🗂️ Models
+
+### **File Model**
+
+-   Soft deletes\
+-   Mutators for lowercase\
+-   HasMany relationship with FileEntry
+
+### **JobBatch Model**
+
+-   Tracks progress\
+-   Stores job statistics
+
+### **FileEntry Model**
+
+-   Represents individual CSV rows\
+-   Belongs to File
+
+## 🚦 Error Handling
+
+-   Try/catch in controllers\
+-   Logging via Laravel Log\
+-   Redirects with user-friendly messages\
+-   Session-based temporary data
+
+## 📝 Code Examples
+
+### Creating Export Batch
+
+``` php
+$batch = Bus::batch($dat)
+    ->name('Export CSV Industry_code_NZSIOC => ' . $request->Industry_code_NZSIOC)
+    ->dispatch();
+
+session(['lastBatchId' => $batch->id]);
+```
+
+### Progress Tracking
+
+``` php
+public function getProgress(Request $request): JsonResponse
+{
+    $batchId = $request->id ?? session('lastBatchId');
+    $batch = Bus::findBatch($batchId);
+
+    return response()->json([
+        'processedJobs' => $batch->processedJobs(),
+        'totalJobs'     => $batch->totalJobs,
+        'progress'      => $batch->progress()
+    ]);
+}
+```
+
+## 🧪 Testing
+
+Run all tests:
+
+``` bash
+php artisan test
+```
+
+## 📄 License
+
+This project is **proprietary software**.\
+All rights reserved.
+
+## 🤝 Support
+
+For issues or feature requests, open an **Issue** in this repository.
