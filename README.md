@@ -1,4 +1,4 @@
-# CSV Export/Import System
+# queue-batches
 
 A Laravel-based batch processing system for exporting and importing CSV
 files with real-time progress tracking and job management.
@@ -35,8 +35,8 @@ files with real-time progress tracking and job management.
 ### 1. Clone the repository
 
 ``` bash
-git clone https://github.com/kroos/laravel-interview.git
-cd laravel-interview
+git clone https://github.com/kroos/queue-batches.git
+cd queue-batches
 ```
 
 ### 2. Install dependencies
