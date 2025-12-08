@@ -110,6 +110,8 @@ class BatchProgressController extends Controller
 			$jb[$k1]['pending'] = ($v1->pending_jobs == 0)?'No Pending':'Pending';
 			$jb[$k1]['success'] = ($v1->pending_jobs == 0 && $v1->failed_jobs == 0)?'Success':(($v1->pending_jobs > 0 && $v1->failed_jobs == 0)?'Not Yet Process':(($v1->pending_jobs == 0 && $v1->failed_jobs > 0)?'Process with Fail':(($v1->pending_jobs > 0 && $v1->failed_jobs > 0)?'Process with Fail':NULL)));
 			$jb[$k1]['failed'] = ($v1->failed_jobs == 0)?'No Failed':'Failed';
+			$jb[$k1]['totalJobs'] = $v1->total_jobs;
+			$jb[$k1]['processedJobs'] = ($v1->total_jobs - $v1->pending_jobs);
 		}
 		return response()->json($jb??[]);
 	}
@@ -118,29 +120,59 @@ class BatchProgressController extends Controller
 	{
 		try {
 			$batchId = $request->id ?? session('lastBatchId');
-			$batch = JobBatch::find($batchId);
+			$batch1 = Bus::findBatch($batchId);
+			// return response()->json([
+			// 	'processedJobs' => $batch1->processedJobs(),
+			// 	'totalJobs' => $batch1->totalJobs,
+			// 	'progress' => $batch1->progress()
+			// ]);
+			$batch2 = JobBatch::find($batchId);
         // If batch is missing (already deleted), assume finished
-			if (!$batch) {
-				return response()->json(100);
+			if (!$batch2) {
+				return response()->json([
+																	'processedJobs' => 0,
+																	'totalJobs' => 0,
+																	'progress' => 100,
+																	'percent' => 100
+																]);
 			}
-			$total = $batch->total_jobs;
-			$pending = $batch->pending_jobs;
+			$total = $batch2->total_jobs;
+			$pending = $batch2->pending_jobs;
 			$processed = $total - $pending;
         // Avoid division by zero
 			if ($total == 0) {
-				return response()->json(100);
+				return response()->json([
+																	'processedJobs' => 0,
+																	'totalJobs' => 0,
+																	'progress' => 100,
+																	'percent' => 100
+																]);
 			}
-        // Calculate %
-			$percent = number_format((($processed / $total) * 100), 2);
         // Force return 100 when finished
 			if ($pending == 0) {
-				return response()->json(100);
+				return response()->json([
+																	'processedJobs' => 0,
+																	'totalJobs' => 0,
+																	'progress' => 100,
+																	'percent' => 100
+																]);
 			}
-        // Format to integer (no decimals needed)
-			return response()->json($percent);
+			// Calculate %
+			$percent = number_format((($processed / $total) * 100), 2);
+			return response()->json([
+																'processedJobs' => $batch1->processedJobs(),
+																'totalJobs' => $batch1->totalJobs,
+																'progress' => $batch1->progress(),
+																'percent' => $percent
+															]);
 		} catch (\Exception $e) {
 			Log::error($e);
-			return response()->json(100);
+			return response()->json([
+																'processedJobs' => 0,
+																'totalJobs' => 0,
+																'progress' => 100,
+																'percent' => 100
+															]);
 		}
 	}
 
