@@ -90,11 +90,11 @@
 		</div>
 
 		<div class="col-sm-12 row justify-content-center align-items-center my-1 m-0 border border-success">
-			<div class="form-group row m-1 @error('textarea') has-error @enderror">
-				<label for="textarea" class="col-form-label col-sm-4">Textarea : </label>
+			<div class="form-group row col-sm-12 border border-primary m-1 @error('test') has-error @enderror">
+				<label for="editor" class="col-form-label col-sm-4">Textarea : </label>
 				<div class="col-sm-8 my-auto">
-					<textarea name="textarea" value="" id="textarea" class="form-control form-control-sm @error('minicolor') is-invalid @enderror" placeholder="Textarea">{{ old('textarea', @$variable->textarea) }}</textarea>
-					@error('textarea')
+					<textarea name="test" id="editor" class="form-control form-control-sm col-sm-12 @error('test') is-invalid @enderror" placeholder="Textarea">{{ old('test', @$variable->test) }}</textarea>
+					@error('test')
 					<div class="invalid-feedback">
 						{{ $message }}
 					</div>
