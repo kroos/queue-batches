@@ -1,6 +1,5 @@
 <?php
 use \Carbon\Carbon;
-
 $currentYear = Carbon::now()->year;
 ?>
 <!doctype html>
@@ -55,12 +54,12 @@ $currentYear = Carbon::now()->year;
 						@include('layouts.messages')
 						<!-- error message end -->
 					</div>
-				<!-- content -->
-				@isset($slot)
-					<div class="tw">{{ $slot }}</div>
-				@endisset
-				@yield('content')
-				<!-- content end -->
+					<!-- content -->
+					@isset($slot)
+						<div class="tw">{{ $slot }}</div>
+					@endisset
+					@yield('content')
+					<!-- content end -->
 				</div>
 
 				<div class="col-sm-2 m-0 p-1">
@@ -74,7 +73,7 @@ $currentYear = Carbon::now()->year;
 	</div>
 	<!-- footer -->
 	<div class="container m-0 mx-auto py-1 align-self-end text-center text-sm text-light-emphasis">
-		&copy; My Themes<br />Themes By Bootswatch<br />
+		&copy; {{ config('app.name', 'Laravel') }} {{ $currentYear }}<br />
 		Laravel v{{ Illuminate\Foundation\Application::VERSION }} (PHP v{{ PHP_VERSION }})
 	</div>
 	<!-- footer end -->
