@@ -1,4 +1,4 @@
-<ul class="nav nav-pills justify-content-center">
+<!-- <ul class="nav nav-pills justify-content-center">
 	<li class="nav-item mx-1">
 		<a class="nav-link active" aria-current="page" href="#">Active</a>
 	</li>
@@ -21,3 +21,4 @@
 		<a class="nav-link" href="#">Link</a>
 	</li>
 </ul>
+ -->

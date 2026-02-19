@@ -1,7 +1,4 @@
 <li class="nav-item">
-	<a class="nav-link" href="{{ route('activity-logs.index') }}">Activity Logs</a>
-</li>
-<li class="nav-item">
 	<a class="nav-link" href="{{ route('importcsvs.index') }}">Import CSV</a>
 </li>
 <li class="nav-item">
@@ -9,6 +6,9 @@
 </li>
 <li class="nav-item">
 	<a class="nav-link" href="{{ route('progress.index') }}">Progress Process</a>
+</li>
+<li class="nav-item">
+	<a class="nav-link" href="{{ route('activity-logs.index') }}">Activity Logs</a>
 </li>
 <li class="nav-item dropdown">
 	<a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Dropdown Menu</a>

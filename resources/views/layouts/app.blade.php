@@ -14,23 +14,23 @@ $currentYear = Carbon::now()->year;
 
 	<title>{{ config('app.name', 'Laravel') }}</title>
 
-	<link href="" type="image/x-icon" rel="icon" />
+	<link href="{{ asset('images/logo.png') }}" type="image/x-icon" rel="icon" />
 
 	<!-- Styles / Scripts -->
 	@vite(['resources/scss/app.scss', 'resources/css/app.css'])
 
 	<!-- Bootswatch Cerulean CSS -->
-	<link href="{{ URL::asset('css/bootstrap.css') }}" rel="stylesheet">
+	<link href="{{ asset('css/bootstrap.css') }}" rel="stylesheet">
 	<!-- Livewire CSS -->
 
 </head>
-<body class="bg-primary-subtle bg-opacity-75 min-vh-100 d-flex flex-column">
+<body class="bg-primary-subtle bg-opacity-75 min-vh-100 d-flex flex-column" data-route="{{ Route::currentRouteName() }}">
 
 	<!-- 1st nav -->
 	@include('layouts.navbar')
 	<!-- 1st nav end -->
 
-	<div class="container-fluid flex-fill">
+	<div class="container-fluid flex-fill d-flex flex-column">
 
 		<div class="col-sm-12 mx-auto my-2">
 			<!-- 2nd nav -->
@@ -38,36 +38,35 @@ $currentYear = Carbon::now()->year;
 			<!-- 2nd nav end -->
 		</div>
 
-		<div class="container-fluid p-1 mx-auto">
-			<div class="col-sm-12 m-0 row justify-content-between">
+		<div class="container-fluid p-1 mx-auto d-flex justify-content-between flex-fill">
 
-				<div class="col-sm-2 m-0">
-					<!-- left side menu -->
-					@include('layouts.navleftside')
-					<!-- left side menu end -->
-				</div>
-
-
-				<div class="col-sm-7 m-0 my-2 p-1 align-self-center">
-					<div class="col-sm-12">
-						<!-- error message -->
-						@include('layouts.messages')
-						<!-- error message end -->
-					</div>
-					<!-- content -->
-					@isset($slot)
-						<div class="tw">{{ $slot }}</div>
-					@endisset
-					@yield('content')
-					<!-- content end -->
-				</div>
-
-				<div class="col-sm-2 m-0 p-1">
-					<!-- right side info -->
-					@include('layouts.inforightside')
-					<!-- right side info end -->
-				</div>
+			<div class="col-sm-2 m-0">
+				<!-- left side menu -->
+				@include('layouts.navleftside')
+				<!-- left side menu end -->
 			</div>
+
+
+			<div class="col-sm-7 m-0 my-2 p-1 align-self-center">
+				<div class="col-sm-12">
+					<!-- error message -->
+					@include('layouts.messages')
+					<!-- error message end -->
+				</div>
+				<!-- content -->
+				@isset($slot)
+					<div class="tw">{{ $slot }}</div>
+				@endisset
+				@yield('content')
+				<!-- content end -->
+			</div>
+
+			<div class="col-sm-2 m-0 p-1">
+				<!-- right side info -->
+				@include('layouts.inforightside')
+				<!-- right side info end -->
+			</div>
+
 		</div>
 
 	</div>

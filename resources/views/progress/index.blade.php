@@ -12,7 +12,7 @@
 				<div class="card-body">
 					<div id="processcsv" class="row col-sm-12">
 						<div class="progress col-sm-12" role="progressbar" aria-label="CSV Processing" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
-							<div class="progress-bar progress-bar-striped progress-bar-animated fw-bolder text-white csvprogress" style="width: 0%">0%</div>
+							<div class="rounded-5 progress-bar progress-bar-striped progress-bar-animated fw-bolder text-white csvprogress" style="width: 0%">0%</div>
 						</div>
 						<div id="processedJobs" class="col-sm-12 text-center">
 						</div>
@@ -34,22 +34,13 @@
 @section('js')
 ///////////////////////////////////////////////////////////////////////////////////////////
 var table = $('#jb').DataTable({
-	// columnDefs: [
-	// 	{ type: 'date', 'targets': [4,5,6] },
-	// 	// { type: 'time', 'targets': [6] },
-	// ],
-	order: [],
-	responsive: true,
-	realtime: true,
-	autoWidth: true,
-	fixedHeader: true,
+	...config.datatable,
 	dom: 'Bfrtip',
 	ajax: {
 		type: 'GET',
 		url: '{{ route('getJobBatchTable') }}',
 		dataSrc: '',
 		data: function(da){
-			da._token = '{!! csrf_token() !!}'
 		},
 	},
 	columns: [
@@ -73,7 +64,6 @@ var table = $('#jb').DataTable({
 		$.ajax({
 			url: '{{ route('getProgress') }}',
 			data: {
-				_token: '{{ csrf_token() }}',
 				id: '{{ request()->id ?? session()->get('lastBatchId') }}'
 			},
 			type: "GET",
@@ -100,7 +90,7 @@ var table = $('#jb').DataTable({
 				}
 			},
 			error: function(jqXHR, textStatus) {
-				console.warn("Progress error:", textStatus);
+				console.log("Progress error:", textStatus);
 			}
 		});
 		// $('#jb').DataTable().ajax.reload(null, false);

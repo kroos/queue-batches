@@ -1,4 +1,4 @@
-<div class="card my-1">
+<!-- <div class="card my-1">
 	<h5 class="card-header">Featured</h5>
 	<div class="card-body">
 		<h5 class="card-title">Special title treatment</h5>
@@ -22,3 +22,4 @@
 		</figure>
 	</div>
 </div>
+ -->

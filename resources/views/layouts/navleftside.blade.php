@@ -1,4 +1,4 @@
-<ul class="nav flex-column">
+<!-- <ul class="nav flex-column">
 	<li class="nav-item">
 		<a class="nav-link active" aria-current="page" href="#">Active</a>
 	</li>
@@ -12,3 +12,4 @@
 		<a class="nav-link disabled" aria-disabled="true">Disabled</a>
 	</li>
 </ul>
+ -->

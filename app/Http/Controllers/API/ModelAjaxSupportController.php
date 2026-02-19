@@ -54,20 +54,66 @@ use Log;
 class ModelAjaxSupportController extends Controller
 {
 	// this 1 need chunks sooner or later
+
 	public function getActivityLogs(Request $request): JsonResponse
 	{
-		$values = ActivityLog::with('belongstouser')
-											->when($request->search, function(Builder $query) use ($request){
-												$query->where('model_type','LIKE','%'.$request->search.'%')
-												->orWhere('ip_address','LIKE','%'.$request->search.'%');
-											})
-											->when($request->id, function($query) use ($request){
-												$query->where('id', $request->id);
-											})
-											->orderBy('created_at', 'DESC')
-											->get();
-		return response()->json($values);
+		$columns = [
+			0 => 'id',
+			1 => 'event',
+			2 => 'model_type',
+			3 => 'user_id',
+			4 => 'ip_address',
+			5 => 'created_at',
+			6 => 'route_name',
+			7 => 'model_id',
+		];
+
+		$query = ActivityLog::select([
+			'id',
+			'event',
+			'model_type',
+			'user_id',
+			'ip_address',
+			'created_at',
+			'route_name',
+			'model_id',
+		]);
+
+		if ($request->search_value) {
+			$search = $request->search_value;
+
+			$query->where(function ($q) use ($search) {
+				$q->where('model_type', 'LIKE', "%{$search}%")
+				->orWhere('ip_address', 'LIKE', "%{$search}%")
+				->orWhere('user_id', 'LIKE', "%{$search}%");
+				// ->orWhereHas('belongstouser', function ($uq) use ($search) {
+				// 	$uq->where('name', 'LIKE', "{$search}%");
+				// });
+			});
+		}
+
+		$totalRecords = ActivityLog::count();
+		$filteredRecords = (clone $query)->count();
+
+		$orderColumn = $columns[$request->order[0]['column']] ?? 'created_at';
+		$orderDir = $request->order[0]['dir'] ?? 'desc';
+
+		$data = $query
+		->orderBy($orderColumn, $orderDir)
+		->skip($request->start)
+		->take($request->length)
+		->get();
+
+		return response()->json([
+			'draw' => intval($request->draw),
+			'recordsTotal' => $totalRecords,
+			'recordsFiltered' => $filteredRecords,
+			'data' => $data,
+		]);
 	}
+
+
+
 
 	public function getYesNoOptions(Request $request): JsonResponse
 	{

@@ -8,4 +8,4 @@
 		</li>
 	@endforeach
 @endif
-<a class="dropdown-item" href="#"><i class="fa-regular fa-comment"></i>Notifications (MarkAsRead in pdf-layout.blade)</a>
+<!-- <a class="dropdown-item" href="#"><i class="fa-regular fa-comment"></i>Notifications (MarkAsRead in pdf-layout.blade)</a> -->

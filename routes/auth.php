@@ -15,19 +15,46 @@ use App\Http\Controllers\FileEntryController;
 
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['auth', 'password.confirm'])->group(function () {
-	Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-	Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-	Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-
-	Route::prefix('activity-logs')->name('activity-logs.')->group(function () {
-		Route::get('/', [ActivityLogController::class, 'index'])->name('index');
-		Route::get('/{log}', [ActivityLogController::class, 'show'])->name('show');
-		Route::delete('/{log}', [ActivityLogController::class, 'destroy'])->name('destroy');
-	});
-});
 
 Route::middleware('auth')->group(function () {
+
+	/* need password.confirm */
+	Route::middleware('password.confirm')->group(function () {
+		Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+		Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+		Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+		Route::prefix('activity-logs')->name('activity-logs.')->group(function () {
+			Route::get('/', [ActivityLogController::class, 'index'])->name('index');
+			Route::get('/{log}', [ActivityLogController::class, 'show'])->name('show');
+			Route::delete('/{log}', [ActivityLogController::class, 'destroy'])->name('destroy');
+		});
+		/* add more password.confirm here */
+
+	});
+
+	/* need email verified */
+	Route::middleware('verified')->group(function () {
+		Route::get('/dashboard', function(){
+			return view('dashboard');
+		})->name('dashboard');
+
+		Route::controller(BatchProgressController::class)->group(function () {
+			Route::get('progress', 'progress')->name('progress');
+			Route::get('/progress/index', 'index')->name('progress.index');
+			Route::get('/progress/downloadCSV', 'downloadCSV')->name('progress.downloadCSV');
+		});
+
+		Route::resources([
+			'importcsvs' => ImportCSVController::class,
+			'exportcsvs' => ExportCSVController::class,
+			'file_entries' => FileEntryController::class,
+		]);
+		/* add more email verified here */
+
+	});
+
+	/* authenticate route */
 	Route::get('verify-email', EmailVerificationPromptController::class)->name('verification.notice');
 	Route::get('verify-email/{id}/{hash}', VerifyEmailController::class)->middleware(['signed', 'throttle:6,1'])->name('verification.verify');
 	Route::post('email/verification-notification', [EmailVerificationNotificationController::class, 'store'])->middleware('throttle:6,1')->name('verification.send');
@@ -35,21 +62,8 @@ Route::middleware('auth')->group(function () {
 	Route::post('confirm-password', [ConfirmablePasswordController::class, 'store']);
 	Route::put('password', [PasswordController::class, 'update'])->name('password.update');
 	Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
-});
-
-Route::middleware(['auth', 'verified'])->group(function () {
-	Route::get('/dashboard', function(){
-		return view('dashboard');
-	})->name('dashboard');
-
-	Route::get('progress', [BatchProgressController::class, 'progress'])->name('progress');
-
-	Route::resources([
-		'importcsvs' => ImportCSVController::class,
-		'exportcsvs' => ExportCSVController::class,
-		'file_entries' => FileEntryController::class,
-	]);
+	/* add more authenticate route here */
 
 });
 
-require __DIR__.'/batch.php';
+
