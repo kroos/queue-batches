@@ -1,7 +1,14 @@
 const { route, url, requestid, sessionlastBatchId } = window.data;
 
 var table = $('#jb').DataTable({
-	...config.datatable,
+	lengthMenu: [[50, 100, -1], [50, 100, 'All']],
+	columnDefs: [
+		{ type: 'date', targets: [2] },
+	],
+	// order: [[0, 'desc']],
+	responsive: true,
+	autoWidth: false,
+	fixedHeader: true,
 	// dom: 'Bfrtip',
 	ajax: {
 		type: 'GET',
