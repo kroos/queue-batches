@@ -3,6 +3,10 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 
+// load batch and queue
+use Illuminate\Bus\Batch;
+use Illuminate\Support\Facades\Bus;
+
 // for controller output
 use Illuminate\Http\JsonResponse;
 // use Illuminate\Http\RedirectResponse;
@@ -53,8 +57,6 @@ use Log;
 
 class ModelAjaxSupportController extends Controller
 {
-	// this 1 need chunks sooner or later
-
 	public function getActivityLogs(Request $request): JsonResponse
 	{
 		$columns = [
@@ -112,16 +114,78 @@ class ModelAjaxSupportController extends Controller
 		]);
 	}
 
-
-
-
-	public function getYesNoOptions(Request $request): JsonResponse
+	public function getJobBatchTable(Request $request): JsonResponse
 	{
-		$yno = YesNoOption::when($request->search, function (Builder $query) use ($request) {
-						$query->where('option', 'LIKE', '%' . $request->search . '%');
-					})
-					->get();
-		return response()->json($yno);
+		$val = JobBatch::orderBy('created_at', 'DESC')->get();
+		foreach($val as $k1 => $v1) {
+			$jb[$k1]['name'] = $v1->name;
+			$jb[$k1]['pending'] = ($v1->pending_jobs == 0)?'No Pending':'Pending';
+			$jb[$k1]['success'] = ($v1->pending_jobs == 0 && $v1->failed_jobs == 0)?'Success':(($v1->pending_jobs > 0 && $v1->failed_jobs == 0)?'Not Yet Process':(($v1->pending_jobs == 0 && $v1->failed_jobs > 0)?'Process with Fail':(($v1->pending_jobs > 0 && $v1->failed_jobs > 0)?'Process with Fail':NULL)));
+			$jb[$k1]['failed'] = ($v1->failed_jobs == 0)?'No Failed':'Failed';
+			$jb[$k1]['totalJobs'] = $v1->total_jobs;
+			$jb[$k1]['processedJobs'] = ($v1->total_jobs - $v1->pending_jobs);
+		}
+		return response()->json($jb??[]);
+	}
+
+	public function getProgress(Request $request): JsonResponse
+	{
+		try {
+			$batchId = $request->id ?? session('lastBatchId');
+			$batch1 = Bus::findBatch($batchId);
+			// return response()->json([
+			// 	'processedJobs' => $batch1->processedJobs(),
+			// 	'totalJobs' => $batch1->totalJobs,
+			// 	'progress' => $batch1->progress()
+			// ]);
+			$batch2 = JobBatch::find($batchId);
+        // If batch is missing (already deleted), assume finished
+			if (!$batch2) {
+				return response()->json([
+																	'processedJobs' => 0,
+																	'totalJobs' => 0,
+																	'progress' => 100,
+																	'percent' => 100
+																]);
+			}
+			$total = $batch2->total_jobs;
+			$pending = $batch2->pending_jobs;
+			$processed = $total - $pending;
+        // Avoid division by zero
+			if ($total == 0) {
+				return response()->json([
+																	'processedJobs' => 0,
+																	'totalJobs' => 0,
+																	'progress' => 100,
+																	'percent' => 100
+																]);
+			}
+        // Force return 100 when finished
+			if ($pending == 0) {
+				return response()->json([
+																	'processedJobs' => 0,
+																	'totalJobs' => 0,
+																	'progress' => 100,
+																	'percent' => 100
+																]);
+			}
+			// Calculate %
+			$percent = number_format((($processed / $total) * 100), 2);
+			return response()->json([
+																'processedJobs' => $batch1->processedJobs(),
+																'totalJobs' => $batch1->totalJobs,
+																'progress' => $batch1->progress(),
+																'percent' => $percent
+															]);
+		} catch (\Exception $e) {
+			Log::error($e);
+			return response()->json([
+																'processedJobs' => 0,
+																'totalJobs' => 0,
+																'progress' => 100,
+																'percent' => 100
+															]);
+		}
 	}
 
 	// public function getProgress(Request $request): JsonResponse
@@ -144,27 +208,86 @@ class ModelAjaxSupportController extends Controller
 	// 	}
 	// }
 
+
+
 	public function getFileEntries(Request $request): JsonResponse
 	{
 		try {
-			$values = FileEntry::with('belongstofile')
-											->when($request->search, function(Builder $query) use ($request){
-												$query->where('Industry_name_NZSIOC','LIKE','%'.$request->search.'%')
-												->orWhere('Industry_aggregation_NZSIOC','LIKE','%'.$request->search.'%')
-												->orWhere('Industry_code_NZSIOC','LIKE','%'.$request->search.'%');
-											})
-											->when($request->id, function($query) use ($request){
-												$query->where('id', $request->id);
-											})
-											->when($request->idIN, function($query) use ($request){
-												$query->whereNotIn('id', $request->idIN);
-											})
-											->orderBy('Industry_code_NZSIOC')
-											->get();
-			return response()->json($values);
+
+			$columns = [
+				0 => 'id',
+				1 => 'file_id',
+				2 => 'Year',
+				3 => 'Industry_aggregation_NZSIOC',
+				4 => 'Industry_code_NZSIOC',
+				5 => 'Industry_name_NZSIOC',
+				6 => 'Units',
+				7 => 'Variable_code',
+				8 => 'Variable_name',
+				9 => 'Variable_category',
+				10 => 'Value',
+				11 => 'Industry_code_ANZSIC06',
+				12 => 'remarks',
+				13 => 'created_at',
+				14 => 'updated_at',
+				15 => 'deleted_at',
+			];
+
+			$query = FileEntry::with('belongstofile')->select([
+				'id',
+				'file_id',
+				'Year',
+				'Industry_aggregation_NZSIOC',
+				'Industry_code_NZSIOC',
+				'Industry_name_NZSIOC',
+				'Units',
+				'Variable_code',
+				'Variable_name',
+				'Variable_category',
+				'Value',
+				'Industry_code_ANZSIC06',
+				'remarks',
+				'created_at',
+				'updated_at',
+				'deleted_at',
+			]);
+
+			$search = $request->search['value'] ?? null;
+			if ($search) {
+				$query->with('belongstofile')
+					->where(function ($q) use ($search) {
+						$q->where('Industry_aggregation_NZSIOC', 'LIKE', "%{$search}%")
+						->orWhere('Industry_code_NZSIOC', 'LIKE', "%{$search}%")
+						->orWhere('Industry_name_NZSIOC', 'LIKE', "%{$search}%")
+						->orWhere('Industry_code_ANZSIC06', 'LIKE', "%{$search}%")
+						->orWhereHas('belongstofile', function ($uq) use ($search) {
+							$uq->where('file', 'LIKE', "{$search}%");
+						});
+					});
+				}
+
+			$totalRecords = FileEntry::count();
+			$filteredRecords = (clone $query)->count();
+
+			$orderColumn = $columns[$request->order[0]['column']] ?? 'created_at';
+			$orderDir = $request->order[0]['dir'] ?? 'desc';
+
+			$data = $query
+			->orderBy($orderColumn, $orderDir)
+			->skip($request->start)
+			->take($request->length)
+			->get();
+
+			return response()->json([
+				'draw' => intval($request->draw),
+				'recordsTotal' => $totalRecords,
+				'recordsFiltered' => $filteredRecords,
+				'data' => $data,
+			]);
+
 		} catch (Exception $e) {
 			Log::error($e);
-			return  response()->json([]);
+			return  response()->json(['danger' => $e->getMessage()]);
 		}
 	}
 
@@ -191,7 +314,7 @@ class ModelAjaxSupportController extends Controller
 			return response()->json($values);
 		} catch (Exception $e) {
 			Log::error($e);
-			return  response()->json([]);
+			return  response()->json(['danger' => $e->getMessage()]);
 		}
 	}
 

@@ -73,34 +73,30 @@ class ExportCSVController extends Controller
 	 */
 	public function store(Request $request): RedirectResponse
 	{
-
+		// dd($request->all());
 		$request->validate([
-												'Industry_code_NZSIOC' => 'nullable',
-											],
-											[],
-											[
-												'Industry_code_NZSIOC' => 'Industry Code NZSIOC',
-											]);
+			'Industry_code_NZSIOC' => 'nullable',
+		],
+		[],
+		[
+			'Industry_code_NZSIOC' => 'Industry Code NZSIOC',
+		]);
 
 		try{
-			$fe = FileEntry::when($request->Industry_code_NZSIOC, function(Builder $query) use ($request){
-												$query->where($request->only('Industry_code_NZSIOC'));
-											})
-											->get()
-											->toArray();
-											// ->count();
-			$chunk = array_chunk($fe, 300);
-			// dd($chunk);
-			foreach($chunk as $k1 => $v1) {
-				// dd($k1, $v1);
-				foreach ($v1 as $value) {
-					$data[$k1][] = $value;
-				}
-				$dat[] = new ExportCSV($data[$k1]);
-			}
-			// dd($data);
-			$batch = Bus::batch($dat)
-						->name('Export CSV Industry_code_NZSIOC => '.$request->Industry_code_NZSIOC.' on -> '.now()->format('j M Y'))
+			$query = FileEntry::when($request->Industry_code_NZSIOC, function ($q) use ($request) {
+				$q->where('Industry_code_NZSIOC', $request->Industry_code_NZSIOC);
+			});
+
+			$jobs = [];
+
+			$query->chunk(2000, function ($rows) use (&$jobs) {
+				$ids = $rows->pluck('id')->toArray();
+
+				$jobs[] = new ExportCSV($ids);
+			});
+
+			$batch = Bus::batch($jobs)
+						->name('Export CSV Industry_code_NZSIOC => '.$request->Industry_code_NZSIOC??'ALL'.' on -> '.now()->format('j M Y'))
 						// ->progress(function (Batch $batch) {
 						// 	// A single job has completed successfully...
 						// })
@@ -114,16 +110,17 @@ class ExportCSVController extends Controller
 						// 	// The batch has finished executing...
 						// })
 						->dispatch();
-			// set session
-			session(
-				['lastBatchId' => $batch->id],
-				['Industry_code_NZSIOC' => $request->Industry_code_NZSIOC ?? null]
-			);
-			// session(['Industry_code_NZSIOC' => $request->Industry_code_NZSIOC]);
+
+			session([
+				'lastBatchId' => $batch->id,
+				'Industry_code_NZSIOC' => $request->Industry_code_NZSIOC ?? null,
+			]);
+
 			return redirect()->route('progress.index', ['id' => $batch->id]);
+
 		} catch(\Exception $e){
 			Log::error($e);
-			return redirect()->route('exportcsvs.create');
+			return redirect()->route('exportcsvs.create')->with('danger', $e->getMessage());
 		}
 	}
 

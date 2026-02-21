@@ -81,10 +81,12 @@ class ImportCSVController extends Controller
 		ini_set('max_execution_time', 0);
 		ini_set('memory_limit', '2048M');
 		$request->validate([
-												'csv.*' => ['required', 'file', 'extensions:csv']
-											],[],[
-												'csv.*' => 'CSV file'
-											]);
+			'csv'   => ['required', 'array'],
+			'csv.*' => ['required', 'file', 'mimes:csv,txt']
+		], [], [
+			'csv'   => 'CSV file',
+			'csv.*' => 'CSV file'
+		]);
 		try{
 			if($request->file('csv')){
 				foreach ($request->file('csv') as $v) {

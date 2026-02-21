@@ -23,7 +23,6 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Bus\Batch;
 use Illuminate\Support\Facades\Bus;
 
-
 // load email & notification
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Notification;// more email
@@ -59,7 +58,7 @@ class BatchProgressController extends Controller
 
 	public function downloadCSV(Request $request)
 	{
-		$filePath1 = 'csv/Industry_code_NZSIOC-'.session('Industry_code_NZSIOC').'.csv';
+		$filePath1 = 'csv/Industry_code_NZSIOC-'.session('Industry_code_NZSIOC')??'All'.'.csv';
 		$filePath2 = 'csv/generate.csv';
 		// dd($filePath1, $filePath2);
 			// dd(session('Industry_code_NZSIOC'), Storage::exists($filePath2));
@@ -93,7 +92,7 @@ class BatchProgressController extends Controller
        // 🔥 Store file path in session so the redirected page can trigger download
 			// session(['downloadFile' => $filePath1]);
 			// session()->flash('downloadFile', $filePath1);
-			return Storage::download($filePath1);
+			// return Storage::download($filePath1);
 			return response()->download(storage_path('app/private/'.$filePath1))->deleteFileAfterSend(true);
 			// return redirect()->route('progress.index');
 		}
@@ -101,79 +100,4 @@ class BatchProgressController extends Controller
 		session()->forget('Industry_code_NZSIOC');
 		return redirect()->route('progress.index');
 	}
-
-	public function getJobBatchTable(Request $request): JsonResponse
-	{
-		$val = JobBatch::orderBy('created_at', 'DESC')->get();
-		foreach($val as $k1 => $v1) {
-			$jb[$k1]['name'] = $v1->name;
-			$jb[$k1]['pending'] = ($v1->pending_jobs == 0)?'No Pending':'Pending';
-			$jb[$k1]['success'] = ($v1->pending_jobs == 0 && $v1->failed_jobs == 0)?'Success':(($v1->pending_jobs > 0 && $v1->failed_jobs == 0)?'Not Yet Process':(($v1->pending_jobs == 0 && $v1->failed_jobs > 0)?'Process with Fail':(($v1->pending_jobs > 0 && $v1->failed_jobs > 0)?'Process with Fail':NULL)));
-			$jb[$k1]['failed'] = ($v1->failed_jobs == 0)?'No Failed':'Failed';
-			$jb[$k1]['totalJobs'] = $v1->total_jobs;
-			$jb[$k1]['processedJobs'] = ($v1->total_jobs - $v1->pending_jobs);
-		}
-		return response()->json($jb??[]);
-	}
-
-	public function getProgress(Request $request): JsonResponse
-	{
-		try {
-			$batchId = $request->id ?? session('lastBatchId');
-			$batch1 = Bus::findBatch($batchId);
-			// return response()->json([
-			// 	'processedJobs' => $batch1->processedJobs(),
-			// 	'totalJobs' => $batch1->totalJobs,
-			// 	'progress' => $batch1->progress()
-			// ]);
-			$batch2 = JobBatch::find($batchId);
-        // If batch is missing (already deleted), assume finished
-			if (!$batch2) {
-				return response()->json([
-																	'processedJobs' => 0,
-																	'totalJobs' => 0,
-																	'progress' => 100,
-																	'percent' => 100
-																]);
-			}
-			$total = $batch2->total_jobs;
-			$pending = $batch2->pending_jobs;
-			$processed = $total - $pending;
-        // Avoid division by zero
-			if ($total == 0) {
-				return response()->json([
-																	'processedJobs' => 0,
-																	'totalJobs' => 0,
-																	'progress' => 100,
-																	'percent' => 100
-																]);
-			}
-        // Force return 100 when finished
-			if ($pending == 0) {
-				return response()->json([
-																	'processedJobs' => 0,
-																	'totalJobs' => 0,
-																	'progress' => 100,
-																	'percent' => 100
-																]);
-			}
-			// Calculate %
-			$percent = number_format((($processed / $total) * 100), 2);
-			return response()->json([
-																'processedJobs' => $batch1->processedJobs(),
-																'totalJobs' => $batch1->totalJobs,
-																'progress' => $batch1->progress(),
-																'percent' => $percent
-															]);
-		} catch (\Exception $e) {
-			Log::error($e);
-			return response()->json([
-																'processedJobs' => 0,
-																'totalJobs' => 0,
-																'progress' => 100,
-																'percent' => 100
-															]);
-		}
-	}
-
 }

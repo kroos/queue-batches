@@ -43,67 +43,14 @@
 @endsection
 
 @section('js')
-///////////////////////////////////////////////////////////////////////////////////////////
-// File upload via Ajax
-$("#form").on('submit', function(e){
-	e.preventDefault();
-	$.ajax({
-		xhr: function() {
-			var xhr = new window.XMLHttpRequest();
-			xhr.upload.addEventListener("progress", function(evt) {
-				if (evt.lengthComputable) {
-					// Declaring JavaScript global variable within function
-					window.percentComplete = ((evt.loaded / evt.total) * 100);
-					$('#progressBar').attr('aria-valuenow', percentComplete).css('width', percentComplete+'%');
-					$(".percent_upload").width(percentComplete.toPrecision(4) + '%');
-					$(".percent_upload").html(percentComplete.toPrecision(4) +'%');
-				}
-			}, false);
-			// console.log(xhr);
-			return xhr;
-		},
-		type: 'POST',
-		url: '{{ route('importcsvs.store') }}',
-		data: new FormData(this),
-		contentType: false,
-		cache: false,
-		processData:false,
-		beforeSend: function(){
-			$(".progress-bar").width('0%');
-			$('#uploadStatus').html('<i class="fa-solid fa-spinner fa-spin-pulse fa-beat-fade"></i> Please wait..');
-		},
-		error:function(resp){
-			const res = resp.responseJSON;
-			swal.fire('Error!', res.message,'error')
-			.then(function(){
-				window.location.reload(true);
-			});
-		},
-		success: function(jqXHR, resp, errorThrown){
-			console.log([jqXHR, resp, errorThrown]);
-			if (percentComplete == 100) {
-				window.location.replace(jqXHR);					// redirect action : important!
-			}
-		}
-	});
-});
-
-// File type validation
-$("#scvu").change(function(){
-	// var allowedTypes = ['application/vnd.ms-excel', 'application/pdf', 'application/msword', 'application/vnd.ms-office', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'image/jpeg', 'image/png', 'image/jpg', 'image/gif'];
-	var allowedTypes = ['application/vnd.ms-excel'];
-	var file = this.files[0];
-	var fileType = file.type;
-	if(!allowedTypes.includes(fileType)){
-		// alert('Please select a valid file (PDF/DOC/DOCX/JPEG/JPG/PNG/GIF).');
-		swal.fire('Error!', 'Please select a valid file (CSV file/s only)','error')
-		.then(function(){
-			window.location.reload(true);
-		});
-		$("#scvu").val('');
-		return false;
-	}
-});
-
-///////////////////////////////////////////////////////////////////////////////////////////
+window.data = {
+	route: {
+		importcsvsstore: '{{ route('importcsvs.store') }}',
+	},
+	url: {
+	},
+	old: {
+	},
+	errors: @json($errors->toArray()),
+};
 @endsection

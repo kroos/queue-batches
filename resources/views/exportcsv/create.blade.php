@@ -36,37 +36,15 @@
 @endsection
 
 @section('js')
-///////////////////////////////////////////////////////////////////////////////////////////
-$('#code').select2({
-	theme: 'bootstrap-5',
-	placeholder: 'Please choose',
-	allowClear: true,
-	closeOnSelect: true,
-	width: '100%',
-	ajax: {
-		url: '{{ route('getSelect2FileEntries') }}',
-		type: 'GET',
-		dataType: 'json',
-		delay: 250,											// Delay to reduce server requests
-		data: function (params) {
-			return {
-				_token: '{!! csrf_token() !!}',
-				search: params.term,				// Search query
-			}
-		},
-		processResults: function (data) {
-			return {
-				results: data.map(function(item) {
-					return {
-						id: item.Industry_code_NZSIOC,
-						text: item.Industry_code_NZSIOC,
-						raw: item
-					}
-				})
-			};
-		}
+window.data = {
+	route: {
+		getSelect2FileEntries: '{{ route('getSelect2FileEntries') }}',
 	},
-});
+	url: {
+	},
+	old: {
+	},
+	errors: @json($errors->toArray()),
+};
 
-///////////////////////////////////////////////////////////////////////////////////////////
 @endsection
