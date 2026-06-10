@@ -1,11 +1,15 @@
 const { route, url, requestid, sessionlastBatchId } = window.data;
 
+$.fn.dataTable.moment( 'D MMM YYYY' );
+$.fn.dataTable.moment( 'YYYY' );
+$.fn.dataTable.moment( 'h:mm a' );
+
 var table = $('#jb').DataTable({
 	lengthMenu: [[50, 100, -1], [50, 100, 'All']],
 	columnDefs: [
-		{ type: 'date', targets: [2] },
+		{ type: 'date', targets: [6] },
 	],
-	// order: [[0, 'desc']],
+	order: [[6, 'desc']],
 	responsive: true,
 	autoWidth: false,
 	fixedHeader: true,
@@ -18,12 +22,13 @@ var table = $('#jb').DataTable({
 		},
 	},
 	columns: [
-		{ data: 'name', title: 'Name', defaultContent: '-', orderable: false, searchable:false },
-		{ data: 'pending', title: 'Pending', defaultContent: '-', orderable: false, searchable:false },
-		{ data: 'success', title: 'Success', defaultContent: '-', orderable: false, searchable:false },
-		{ data: 'failed', title: 'Failed', defaultContent: '-', orderable: false, searchable:false },
-		{ data: 'totalJobs', title: 'Total Jobs', defaultContent: '-', orderable: false, searchable:false },
-		{ data: 'processedJobs', title: 'Processed Jobs', defaultContent: '-', orderable: false, searchable:false },
+		{ data: 'name', title: 'Name', defaultContent: '-', orderable: false, searchable:false, className: 'text-center', defaultContent: '-' },
+		{ data: 'pending', title: 'Pending', defaultContent: '-', orderable: false, searchable:false, className: 'text-center', defaultContent: '-' },
+		{ data: 'success', title: 'Success', defaultContent: '-', orderable: false, searchable:false, className: 'text-center', defaultContent: '-' },
+		{ data: 'failed', title: 'Failed', defaultContent: '-', orderable: false, searchable:false, className: 'text-center', defaultContent: '-' },
+		{ data: 'totalJobs', title: 'Total Jobs', defaultContent: '-', orderable: false, searchable:false, className: 'text-center', defaultContent: '-' },
+		{ data: 'processedJobs', title: 'Processed Jobs', defaultContent: '-', orderable: false, searchable:false, className: 'text-center', defaultContent: '-' },
+		{ data: 'created_at', title: 'Dates', defaultContent: '-', className: 'text-center', defaultContent: '-' },
 	],
 	initComplete: function(settings, response) {
 		// console.log(response); // This runs after successful loading

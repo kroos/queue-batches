@@ -116,16 +116,20 @@ class ModelAjaxSupportController extends Controller
 
 	public function getJobBatchTable(Request $request): JsonResponse
 	{
-		$val = JobBatch::orderBy('created_at', 'DESC')->get();
-		foreach($val as $k1 => $v1) {
-			$jb[$k1]['name'] = $v1->name;
-			$jb[$k1]['pending'] = ($v1->pending_jobs == 0)?'No Pending':'Pending';
-			$jb[$k1]['success'] = ($v1->pending_jobs == 0 && $v1->failed_jobs == 0)?'Success':(($v1->pending_jobs > 0 && $v1->failed_jobs == 0)?'Not Yet Process':(($v1->pending_jobs == 0 && $v1->failed_jobs > 0)?'Process with Fail':(($v1->pending_jobs > 0 && $v1->failed_jobs > 0)?'Process with Fail':NULL)));
-			$jb[$k1]['failed'] = ($v1->failed_jobs == 0)?'No Failed':'Failed';
-			$jb[$k1]['totalJobs'] = $v1->total_jobs;
-			$jb[$k1]['processedJobs'] = ($v1->total_jobs - $v1->pending_jobs);
-		}
-		return response()->json($jb??[]);
+		$values = JobBatch::orderBy('created_at', 'DESC')
+						->get()
+						->map(function($job){
+							return [
+								'name' => $job->name,
+								'pending' => ($job->pending_jobs == 0)?'No Pending':'Pending',
+								'success' => ($job->pending_jobs == 0 && $job->failed_jobs == 0)?'Success':(($job->pending_jobs > 0 && $job->failed_jobs == 0)?'Not Yet Process':(($job->pending_jobs == 0 && $job->failed_jobs > 0)?'Process with Fail':(($job->pending_jobs > 0 && $job->failed_jobs > 0)?'Process with Fail':NULL))),
+								'failed' => ($job->failed_jobs == 0)?'No Failed':'Failed',
+								'totalJobs' => $job->total_jobs,
+								'processedJobs' => ($job->total_jobs - $job->pending_jobs),
+								'created_at' => ($job->created_at->format('j F Y g:i A')),
+							];
+						});
+		return response()->json($values??[]);
 	}
 
 	public function getProgress(Request $request): JsonResponse
@@ -207,8 +211,6 @@ class ModelAjaxSupportController extends Controller
 	// 		return response()->json([]);
 	// 	}
 	// }
-
-
 
 	public function getFileEntries(Request $request): JsonResponse
 	{
